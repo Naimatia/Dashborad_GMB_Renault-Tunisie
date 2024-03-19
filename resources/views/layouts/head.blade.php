@@ -30,4 +30,29 @@
     border-radius: 100px; /* Adjust the value as needed */
 }
 </style>
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<!-- daterangepicker CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<!-- Custom CSS for the date range picker -->
+<style>
+    .daterangepicker {
+        border-radius: 4px;
+        color: hsl(0, 0%, 20%);
+        font-size: 14px;
+    }
+
+    .daterangepicker .ranges ul li.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .daterangepicker .drp-calendar {
+        border: none;
+    }
+
+    .daterangepicker .drp-calendar.left {
+        border-right: none;
+    }
+</style>
 @yield('css')
