@@ -72,7 +72,7 @@ class GoogleAuthController extends Controller
         }
         return $expiresAt ? true : false;
     }
-// mybusinessbusinessinformation API
+    // mybusinessbusinessinformation API
     public function callGoogleApi()
     {
 
@@ -101,46 +101,55 @@ class GoogleAuthController extends Controller
 
         // Faites quelque chose avec les données, par exemple, les retourner ou les afficher
         return view('locations', compact('locations'));
-      }
+    }
 
-      public function PerfermanceAPI()
-      {
-          if (!$this->refreshTokenIfNeeded()) {
-              return redirect('/')->with('error', 'Access token is not set or refresh failed. Please login again.');
-          }
-          $token = session('google_access_token');
-
-          if (!$token) {
-              return redirect('/')->with('error', 'Access token is not set. Please login again.');
-          }
-
-          // Replace this URL with the endpoint for the Performance API
-          $url = 'https://businessprofileperformance.googleapis.com/v1/locations/16865183253846802889:fetchMultiDailyMetricsTimeSeries?dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_SEARCH&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_SEARCH&dailyRange.start_date.year=2023&dailyRange.start_date.month=2&dailyRange.start_date.day=1&dailyRange.end_date.year=2024&dailyRange.end_date.month=3&dailyRange.end_date.day=30';
-
-          // Make the API call
-          $response = Http::withOptions([
-              'verify' => 'E:\PFE package\Dashborad_GMB\cacert.pem',
-          ])->withHeaders([
-              'Authorization' => 'Bearer ' . $token,
-          ])->get($url);
-
-          // Check if the call was successful
-          if ($response->failed()) {
-              return redirect('/')->with('error', 'Failed to fetch performance data from Google My Business.');
-          }
-
-          // Decode the JSON response
-          $performanceData = $response->json();
-
-          // Process the data as needed, e.g., organize for charting
-
-          // Return the view with the performance data
-          return view('fiche', compact('performanceData'));
-      }
+    public function PerfermanceAPI(Request $request)
+    {
+        // Retrieve query parameters
+        $startYear = $request->query('startYear');
+        $startMonth = $request->query('startMonth');
+        $endYear = $request->query('endYear');
+        $endMonth = $request->query('endMonth');
+        $startDay = $request->query('startDay');
+        $endDay = $request->query('endDay');
 
 
+        if (!$this->refreshTokenIfNeeded()) {
+            return redirect('/')->with('error', 'Access token is not set or refresh failed. Please login again.');
+        }
+        $token = session('google_access_token');
 
+        if (!$token) {
+            return redirect('/')->with('error', 'Access token is not set. Please login again.');
+        }
 
+        // Replace this URL with the endpoint for the Performance API
+        $url = "https://businessprofileperformance.googleapis.com/v1/locations/16865183253846802889:fetchMultiDailyMetricsTimeSeries?dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_SEARCH&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_SEARCH&dailyRange.start_date.year={$startYear}&dailyRange.start_date.month={$startMonth}&dailyRange.start_date.day={$startDay}&dailyRange.end_date.year={$endYear}&dailyRange.end_date.month={$endMonth}&dailyRange.end_date.day={$endDay}";
 
+        // Make the API call
+        $response = Http::withOptions([
+            'verify' => 'E:\PFE package\Dashborad_GMB\cacert.pem',
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->get($url);
 
+        // Check if the call was successful
+        if ($response->failed()) {
+            //    return redirect('/')->with('error', 'Failed to fetch performance data from Google My Business.');
+        }
+
+        // Decode the JSON response
+        $performanceData = $response->json();
+
+        // Process the data as needed, e.g., organize for charting
+
+        // Return the view with the performance data
+        if ($request->ajax()) {
+            // For AJAX requests, return JSON data
+            return response()->json($performanceData);
+        } else {
+            // For regular requests, return the view
+            return view('fiche', compact('performanceData'));
+        }
+    }
 }

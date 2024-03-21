@@ -34,7 +34,7 @@
 <script src="dist/js/pages/dashboard.js"></script>
 <!-- Include the Chart.js library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
 <!-- daterangepicker JS -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
@@ -43,68 +43,80 @@
 
 <!-- date period -->
 <script>
-    $(function() {
-        $('#dateRangePicker').daterangepicker({
-            opens: 'left',
-            showDropdowns: true, // Allows dropdowns for year and month
-            autoApply: true,
-            startDate: moment().startOf(
-                'month'), // Set start date to the first day of the current month
-            endDate: moment().endOf('month'),
-            locale: {
-                format: 'MMM YYYY', // Formatting to show only month and year
-                applyLabel: 'Appliquer',
-                cancelLabel: 'Annuler',
-                fromLabel: 'De',
-                toLabel: 'À',
-                customRangeLabel: 'Période personnalisée',
-                daysOfWeek: ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'],
-                monthNames: [
-                    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-                ],
-                firstDay: 1
-            },
-            ranges: {
-                'Ce mois': [moment().startOf('month'), moment().endOf('month')],
-                'Le mois dernier': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1,
-                    'month').endOf('month')],
-                'Les 6 derniers mois': [moment().subtract(6, 'months').startOf('month'), moment().endOf(
-                    'month')],
-                'L’année dernière': [moment().subtract(1, 'year').startOf('month'), moment().endOf(
-                    'month')],
-            },
-            showCustomRangeLabel: false,
-            linkedCalendars: false
+$(function() {
+    // Stocker la date initiale
+    var initialStartDate = moment().startOf('month');
+    var initialEndDate = moment().endOf('month');
 
+    $('#dateRangePicker').daterangepicker({
+        opens: 'left',
+        showDropdowns: true, // Allows dropdowns for year and month
+        autoApply: true,
+        startDate: initialStartDate, // Utiliser la date initiale
+        endDate: initialEndDate, // Utiliser la date initiale
+        locale: {
+            format: 'MMM YYYY', // Formatting to show only month and year
+            applyLabel: 'Appliquer',
+            cancelLabel: 'Annuler',
+            fromLabel: 'De',
+            toLabel: 'À',
+            customRangeLabel: 'Période personnalisée',
+            daysOfWeek: ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'],
+            monthNames: [
+                'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+            ],
+            firstDay: 1
+        },
+        ranges: {
+            'Ce mois': [moment().startOf('month'), moment().endOf('month')],
+            'Le mois dernier': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            'Les 6 derniers mois': [moment().subtract(6, 'months').startOf('month'), moment().endOf('month')],
+            'L’année dernière': [moment().subtract(1, 'year').startOf('month'), moment().endOf('month')],
+        },
+        showCustomRangeLabel: false,
+        linkedCalendars: false
+    });
 
+    // Set the initial value of the input to "Ce mois"
+    $('#dateRangePicker').val(initialStartDate.format('MMM YYYY') + ' - ' + initialEndDate.format('MMM YYYY'));
+
+    // Fonction pour effectuer l'appel AJAX
+    function performAjaxCall(startDate, endDate) {
+        $.ajax({
+            url: 'http://localhost:8000/fiche',
+            type: 'GET', // ou 'POST'
+            data: {
+                startYear: startDate.format('YYYY'),
+                startMonth: startDate.format('M'),
+                endYear: endDate.format('YYYY'),
+                endMonth: endDate.format('M'),
+                startDay: startDate.format('D'),
+                endDay: endDate.format('D'),
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                console.log('Performance data:', response);
+                updateCharts(response); // Vous devez définir cette fonction pour mettre à jour les graphiques avec les données reçues
+            },
+            error: function(error) {
+                console.log('Error fetching performance data:', error);
+            }
         });
-        // Set the initial value of the input to "Ce mois"
-        $('#dateRangePicker').val(moment().startOf('month').format('MMM YYYY') + ' - ' + moment().endOf('month')
-            .format('MMM YYYY'));
-    });
+    }
 
-// Définition de la fonction pour récupérer le mois et l'année sélectionnés
-function getSelectedMonthAndYear() {
-    var startDate = $('#dateRangePicker').data('daterangepicker').startDate;
-    var endDate = $('#dateRangePicker').data('daterangepicker').endDate;
-    var startMonth = startDate.format('M'); // Récupérer le numéro du mois
-    var endMonth = endDate.format('M'); // Récupérer le numéro du mois
-    var startYear = startDate.format('YYYY');
-    var endYear = endDate.format('YYYY');
-    return {
-        start: startMonth,
-        end: endMonth,
-        startYear: startYear,
-        endYear: endYear
-    };
-}
- // Événement de changement de la plage de dates sélectionnée
- $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
-        var selectedDates = getSelectedMonthAndYear();
-        console.log(selectedDates.start , selectedDates.startYear);
-        console.log(selectedDates.end , selectedDates.endYear);
+    // Appeler l'AJAX lors de l'initialisation de la page
+    performAjaxCall(initialStartDate, initialEndDate);
+
+    // Événement de changement de la plage de dates sélectionnée
+    $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+        var startDate = picker.startDate;
+        var endDate = picker.endDate;
+        performAjaxCall(startDate, endDate);
     });
+});
+
+
 </script>
 
 @yield('scripts')

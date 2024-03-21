@@ -265,31 +265,47 @@
         </div>
 
 
-        <div class="date-picker">
-            <div class="month-year-selector">
-                <button class="button">Jan</button>
-                <button class="button">Fév</button>
-                <!-- Ajoutez d'autres boutons pour les mois ici -->
-                <button class="button">Déc</button>
-            </div>
-            <div class="date-range">
-                <input type="date" id="start-date">
-                <input type="date" id="end-date">
-            </div>
-            <div>
-                <button class="button">Annuler</button>
-                <button class="button">Appliquer</button>
-            </div>
-        </div>
+
 
     </div>
     </div>
 @endsection
 
 @section('scripts')
-    <script>
-        // Assuming $performanceData is passed from the controller and contains the data
-        const rawData = @json($performanceData);
+
+
+<script>
+    // Assuming $performanceData is passed from the controller and contains the data
+    // Initialize rawData with a placeholder or actual data from the controller
+    const rawData = @json($performanceData);
+
+    // Define colors outside of any function to make them globally accessible
+    const colors = {
+        'Recherche Google-ordinateur': { backgroundColor: 'rgb(54, 162, 235)', borderColor: 'rgb(54, 162, 235)' },
+        'Google Maps-mobile': { backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)' },
+        'Google Maps-ordinateur': { backgroundColor: 'rgb(75, 192, 192)', borderColor: 'rgb(75, 192, 192)' },
+        'Recherche Google-mobile': { backgroundColor: 'rgb(255, 205, 86)', borderColor: 'rgb(255, 205, 86)' }
+    };
+
+    // A helper function to get the month name from a month index
+    function getMonthName(month) {
+        const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+        return monthNames[month - 1];
+    }
+// A helper function to check if all dates are from the same month
+function isSingleMonthData(performanceData) {
+    const firstMonth = performanceData.multiDailyMetricTimeSeries[0].dailyMetricTimeSeries[0].timeSeries.datedValues[0].date.month;
+    return performanceData.multiDailyMetricTimeSeries.every(series =>
+        series.dailyMetricTimeSeries.every(metricSeries =>
+            metricSeries.timeSeries.datedValues.every(datedValue =>
+                datedValue.date.month === firstMonth
+            )
+        )
+    );
+}
+    // Define the updateCharts function here to ensure it has access to all needed variables and functions
+    function updateCharts(performanceData) {
+        const singleMonthData = isSingleMonthData(performanceData);
 
         // Initialize objects to store the monthly totals for each category
         const monthlyTotals = {
@@ -299,16 +315,8 @@
             'Recherche Google-mobile': {}
         };
 
-        // A helper function to get the month name from a month index
-        function getMonthName(month) {
-            const monthNames = [
-                "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-                "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-            ];
-            return monthNames[month - 1];
-        }
-
-        rawData.multiDailyMetricTimeSeries.forEach(series => {
+        // Process the performance data
+        performanceData.multiDailyMetricTimeSeries.forEach(series => {
             series.dailyMetricTimeSeries.forEach(metricSeries => {
                 metricSeries.timeSeries.datedValues.forEach(datedValue => {
                     const monthName = getMonthName(datedValue.date.month);
@@ -317,33 +325,13 @@
                         'BUSINESS_IMPRESSIONS_MOBILE_MAPS': 'Google Maps-mobile',
                         'BUSINESS_IMPRESSIONS_DESKTOP_MAPS': 'Google Maps-ordinateur',
                         'BUSINESS_IMPRESSIONS_MOBILE_SEARCH': 'Recherche Google-mobile'
-                    } [metricSeries.dailyMetric];
-
-                    monthlyTotals[metricName][monthName] = (monthlyTotals[metricName][monthName] ||
-                        0) + (parseInt(datedValue.value) || 0);
+                    }[metricSeries.dailyMetric];
+                    monthlyTotals[metricName][monthName] = (monthlyTotals[metricName][monthName] || 0) + (parseInt(datedValue.value) || 0);
                 });
             });
         });
-
-        // Color configuration for each category
-        const colors = {
-            'Recherche Google-ordinateur': {
-                backgroundColor: 'rgb(54, 162, 235)',
-                borderColor: 'rgb(54, 162, 235)'
-            }, // Blue
-            'Google Maps-mobile': {
-                backgroundColor: 'rgb(255, 99, 132)',
-                borderColor: 'rgb(255, 99, 132)'
-            }, // Red
-            'Google Maps-ordinateur': {
-                backgroundColor: 'rgb(75, 192, 192)',
-                borderColor: 'rgb(75, 192, 192)'
-            }, // Green
-            'Recherche Google-mobile': {
-                backgroundColor: 'rgb(255, 205, 86)',
-                borderColor: 'rgb(255, 205, 86)'
-            } // Yellow
-        };
+   // Check if data is for a single month
+    const monthNames = Object.keys(monthlyTotals['Recherche Google-ordinateur']);
 
         // Convert monthly totals to datasets format for Chart.js
         const datasets = Object.entries(monthlyTotals).map(([label, data]) => ({
@@ -356,57 +344,52 @@
         // Use the months as labels
         const labels = Object.keys(monthlyTotals['Recherche Google-ordinateur']);
 
-        // Render the line chart
-        const ctx = document.getElementById('impressionsChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // This will allow the chart to resize based on container's aspect ratio
-                scales: {
-                    x: {
-                        display: true
-                    },
-                    y: {
-                        display: true
-                    }
-                }
-            }
-        });
+        // Update the line chart
+        myChart.data.labels = labels;
+        myChart.data.datasets = datasets;
+        myChart.type = singleMonthData ? 'line' : 'bar'; // Change the chart type based on the data
+        myChart.update();
 
         // Assuming you have sales data to display in a doughnut chart
-        const salesData = {
-            labels: [
-                'Sales 1',
-                'Sales 2',
-                'Sales 3'
-            ],
-            datasets: [{
-                data: [300, 50, 100],
-                backgroundColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)'
-                ],
-                hoverOffset: 4
-            }]
-        };
+        // This part remains unchanged, add or update sales data logic here
+    }
 
-        // Render the doughnut chart for Sales
-        const salesCtx = document.getElementById('impressionsSales').getContext('2d');
-        const salesChart = new Chart(salesCtx, {
-            type: 'doughnut',
-            data: salesData,
+    // Render the charts
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('impressionsChart').getContext('2d');
+
+        window.myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [], // Initialize with empty labels
+                datasets: [] // Initialize with empty datasets
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false
             }
         });
-    </script>
 
+        const salesCtx = document.getElementById('impressionsSales').getContext('2d');
+        window.salesChart = new Chart(salesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Sales 1', 'Sales 2', 'Sales 3'],
+                datasets: [{
+                    data: [300, 50, 100], // Example data
+                    backgroundColor: ['rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 205, 86)'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Update charts with rawData or fetch new data as needed
+        updateCharts(rawData);
+    });
+</script>
 
 @endsection
