@@ -22,23 +22,25 @@
 
 @section('content')
     <div class="container-fluid">
+
         <!-- Info boxes -->
         <div class="row">
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="info-box">
-                    <span class="info-box-icon bg-info elevation-1"><i class="fas fa-cog"></i></span>
+                    <span class="info-box-icon bg-info elevation-1"><i class="fas fa-eye"></i></span>
 
                     <div class="info-box-content">
-                        <span class="info-box-text">CPU Traffic</span>
+                        <span class="info-box-text">Consultations</span>
                         <span class="info-box-number">
-                            10
-                            <small>%</small>
+                            <span id="currentYearTotal"></span>
+                            <span class="description-percentage" id="growthRateDisplay" style="font-weight: normal;"></span>
                         </span>
                     </div>
                     <!-- /.info-box-content -->
                 </div>
                 <!-- /.info-box -->
             </div>
+
             <!-- /.col -->
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="info-box mb-3">
@@ -243,7 +245,7 @@
                                     <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Bàtons</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#sales-chart" data-toggle="tab">Pie</a>
+                                    <a class="nav-link" href="#sales-chart" data-toggle="tab">Circulaire</a>
                                 </li>
                             </ul>
                         </div>
@@ -274,122 +276,225 @@
 @section('scripts')
 
 
-<script>
-    // Assuming $performanceData is passed from the controller and contains the data
-    // Initialize rawData with a placeholder or actual data from the controller
-    const rawData = @json($performanceData);
+    <script>
+        // Assuming $performanceData is passed from the controller and contains the data
+        // Initialize rawData with a placeholder or actual data from the controller
+        const rawData = @json($currentYearPerformanceData);
 
-    // Define colors outside of any function to make them globally accessible
-    const colors = {
-        'Recherche Google-ordinateur': { backgroundColor: 'rgb(54, 162, 235)', borderColor: 'rgb(54, 162, 235)' },
-        'Google Maps-mobile': { backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)' },
-        'Google Maps-ordinateur': { backgroundColor: 'rgb(75, 192, 192)', borderColor: 'rgb(75, 192, 192)' },
-        'Recherche Google-mobile': { backgroundColor: 'rgb(255, 205, 86)', borderColor: 'rgb(255, 205, 86)' }
-    };
-
-    // A helper function to get the month name from a month index
-    function getMonthName(month) {
-        const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-        return monthNames[month - 1];
-    }
-// A helper function to check if all dates are from the same month
-function isSingleMonthData(performanceData) {
-    const firstMonth = performanceData.multiDailyMetricTimeSeries[0].dailyMetricTimeSeries[0].timeSeries.datedValues[0].date.month;
-    return performanceData.multiDailyMetricTimeSeries.every(series =>
-        series.dailyMetricTimeSeries.every(metricSeries =>
-            metricSeries.timeSeries.datedValues.every(datedValue =>
-                datedValue.date.month === firstMonth
-            )
-        )
-    );
-}
-    // Define the updateCharts function here to ensure it has access to all needed variables and functions
-    function updateCharts(performanceData) {
-        const singleMonthData = isSingleMonthData(performanceData);
-
-        // Initialize objects to store the monthly totals for each category
-        const monthlyTotals = {
-            'Recherche Google-ordinateur': {},
-            'Google Maps-mobile': {},
-            'Google Maps-ordinateur': {},
-            'Recherche Google-mobile': {}
+        // Define colors outside of any function to make them globally accessible
+        const colors = {
+            'Recherche Google-ordinateur': {
+                backgroundColor: 'rgb(31, 119, 180)',
+                borderColor: 'rgb(31, 119, 180)',
+            },
+            'Google Maps-mobile': {
+                backgroundColor: 'rgb(255, 127, 14)',
+                borderColor: 'rgb(255, 127, 14)',
+            },
+            'Google Maps-ordinateur': {
+                backgroundColor: 'rgb(44, 160, 44)',
+                borderColor: 'rgb(44, 160, 44)',
+            },
+            'Recherche Google-mobile': {
+                backgroundColor: 'rgb(214, 39, 40)',
+                borderColor: 'rgb(214, 39, 40)'
+            }
         };
 
-        // Process the performance data
-        performanceData.multiDailyMetricTimeSeries.forEach(series => {
-            series.dailyMetricTimeSeries.forEach(metricSeries => {
-                metricSeries.timeSeries.datedValues.forEach(datedValue => {
-                    const monthName = getMonthName(datedValue.date.month);
-                    const metricName = {
-                        'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH': 'Recherche Google-ordinateur',
-                        'BUSINESS_IMPRESSIONS_MOBILE_MAPS': 'Google Maps-mobile',
-                        'BUSINESS_IMPRESSIONS_DESKTOP_MAPS': 'Google Maps-ordinateur',
-                        'BUSINESS_IMPRESSIONS_MOBILE_SEARCH': 'Recherche Google-mobile'
-                    }[metricSeries.dailyMetric];
-                    monthlyTotals[metricName][monthName] = (monthlyTotals[metricName][monthName] || 0) + (parseInt(datedValue.value) || 0);
+        // A helper function to get the month name from a month index
+        function getMonthName(month) {
+            const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre",
+                "Octobre", "Novembre", "Décembre"
+            ];
+            return monthNames[month - 1];
+        }
+
+        // Define the updateCharts function here to ensure it has access to all needed variables and functions
+        function updateCharts(currentYearPerformanceData) {
+
+            // Initialize objects to store the monthly totals for each category
+            const monthlyTotals = {
+                'Recherche Google-ordinateur': {},
+                'Google Maps-mobile': {},
+                'Google Maps-ordinateur': {},
+                'Recherche Google-mobile': {}
+            };
+
+            // Process the performance data
+            currentYearPerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
+                series.dailyMetricTimeSeries.forEach(metricSeries => {
+                    metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                        const year = datedValue.date.year;
+                        const monthName = getMonthName(datedValue.date.month);
+                        const metricName = {
+                            'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH': 'Recherche Google-ordinateur',
+                            'BUSINESS_IMPRESSIONS_MOBILE_MAPS': 'Google Maps-mobile',
+                            'BUSINESS_IMPRESSIONS_DESKTOP_MAPS': 'Google Maps-ordinateur',
+                            'BUSINESS_IMPRESSIONS_MOBILE_SEARCH': 'Recherche Google-mobile'
+                        } [metricSeries.dailyMetric];
+                        // Initialize the year if it's not already in the monthlyTotals
+                        if (!monthlyTotals[metricName][year]) {
+                            monthlyTotals[metricName][year] = {};
+                        }
+                        // Initialize the month if it's not already in the monthlyTotals for the year
+                        if (!monthlyTotals[metricName][year][monthName]) {
+                            monthlyTotals[metricName][year][monthName] = 0;
+                        }
+                        monthlyTotals[metricName][year][monthName] += parseInt(datedValue.value ||
+                            0);
+                    });
                 });
             });
-        });
-   // Check if data is for a single month
-    const monthNames = Object.keys(monthlyTotals['Recherche Google-ordinateur']);
+            console.log('Monthly Totals:', monthlyTotals); // Log monthlyTotals to check its structure
 
-        // Convert monthly totals to datasets format for Chart.js
-        const datasets = Object.entries(monthlyTotals).map(([label, data]) => ({
-            label,
-            data: Object.values(data),
-            fill: false,
-            ...colors[label],
-        }));
 
-        // Use the months as labels
-        const labels = Object.keys(monthlyTotals['Recherche Google-ordinateur']);
+            // Generate labels for the line chart
+            const labels = [];
+            Object.keys(monthlyTotals['Recherche Google-ordinateur']).forEach(year => {
+                Object.keys(monthlyTotals['Recherche Google-ordinateur'][year]).forEach(month => {
+                    labels.push(`${month} ${year}`);
+                });
+            });
 
-        // Update the line chart
-        myChart.data.labels = labels;
-        myChart.data.datasets = datasets;
-        myChart.type = singleMonthData ? 'line' : 'bar'; // Change the chart type based on the data
-        myChart.update();
+            // Convert monthly totals to datasets format for Chart.js
+            const datasets = Object.entries(monthlyTotals).map(([label, data]) => ({
+                label,
+                data: Object.values(data).flatMap(yearData => Object.values(yearData)),
+                fill: false,
+                ...colors[label],
+            }));
 
-        // Assuming you have sales data to display in a doughnut chart
-        // This part remains unchanged, add or update sales data logic here
-    }
+            // Update the line chart
+            myChart.data.labels = labels;
+            myChart.data.datasets = datasets;
+            myChart.update();
 
-    // Render the charts
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('impressionsChart').getContext('2d');
+            //Update the sales
+            // Initialize salesData object to store the sum of values for each category
+            const salesData = {};
 
-        window.myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [], // Initialize with empty labels
-                datasets: [] // Initialize with empty datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
+            // Process the performance data for each category
+            Object.keys(monthlyTotals).forEach(category => {
+                // Initialize the sum for the current category
+                let sum = 0;
+                // Iterate over each year and sum the values for the current category
+                Object.values(monthlyTotals[category]).forEach(yearData => {
+                    Object.values(yearData).forEach(monthValue => {
+                        sum += monthValue;
+                    });
+                });
+                // Store the sum for the current category
+                salesData[category] = sum;
+            });
+
+
+            // Use the categories as labels for salesChart
+            const salesLabels = Object.keys(monthlyTotals);
+
+            // Update salesChart with the summed data
+            salesChart.data.labels = salesLabels;
+            salesChart.data.datasets = [{
+                data: Object.values(salesData), // Extract values from salesData
+                backgroundColor: [
+                    'rgb(31, 119, 180)', // Dark blue
+                    'rgb(255, 127, 14)', // Dark orange
+                    'rgb(44, 160, 44)', // Dark green
+                    'rgb(214, 39, 40)' // Dark red
+                ],
+                borderColor: [
+                    'rgb(31, 119, 180)', // Dark blue
+                    'rgb(255, 127, 14)', // Dark orange
+                    'rgb(44, 160, 44)', // Dark green
+                    'rgb(214, 39, 40)' // Dark red
+                ],
+
+                borderWidth: 1
+            }];
+            salesChart.update();
+
+
+            console.log('Sales Data:', salesData); // Log salesData to check its contents
+
+
+            // Initialize the total values for both years
+            let currentYearTotal = 0;
+            let lastYearTotal = 0;
+
+            // Process the performance data for the current year
+            currentYearPerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
+                series.dailyMetricTimeSeries.forEach(metricSeries => {
+                    metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                        currentYearTotal += parseInt(datedValue.value) || 0;
+                    });
+                });
+            });
+
+            // Process the performance data for the last year
+            currentYearPerformanceData.lastYearData.multiDailyMetricTimeSeries.forEach(series => {
+                series.dailyMetricTimeSeries.forEach(metricSeries => {
+                    metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                        lastYearTotal += parseInt(datedValue.value) || 0;
+                    });
+                });
+            });
+
+            // Calculate the growth rate
+            const growthRate = ((currentYearTotal - lastYearTotal) / lastYearTotal) * 100;
+
+            // Sélectionner l'élément qui affiche le taux de croissance
+            const growthRateDisplay = document.getElementById('growthRateDisplay');
+
+            // Mettre à jour le texte et la classe en fonction du taux de croissance
+            if (growthRate < 0) {
+                growthRateDisplay.textContent = Math.abs(growthRate).toFixed(1);
+                growthRateDisplay.classList.add('text-danger'); // Ajouter la classe pour afficher en rouge
+                growthRateDisplay.innerHTML += '% <i class="fas fa-caret-down"></i>';
+            } else {
+                growthRateDisplay.textContent = growthRate.toFixed(1);
+                growthRateDisplay.classList.remove('text-danger');
+                growthRateDisplay.classList.add('text-success'); // Retirer la classe pour afficher en vert
+                growthRateDisplay.innerHTML += '% <i class="fas fa-caret-up"></i>';
             }
-        });
 
-        const salesCtx = document.getElementById('impressionsSales').getContext('2d');
-        window.salesChart = new Chart(salesCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Sales 1', 'Sales 2', 'Sales 3'],
-                datasets: [{
-                    data: [300, 50, 100], // Example data
-                    backgroundColor: ['rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 205, 86)'],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
+            const Total = document.getElementById('currentYearTotal');
+            Total.textContent = currentYearTotal;
 
-        // Update charts with rawData or fetch new data as needed
-        updateCharts(rawData);
-    });
-</script>
+
+        }
+
+        // Render the charts
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('impressionsChart').getContext('2d');
+
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [], // Initialize with empty labels
+                    datasets: [] // Initialize with empty datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            const salesCtx = document.getElementById('impressionsSales').getContext('2d');
+            window.salesChart = new Chart(salesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                },
+            });
+
+
+            // Update charts with rawData or fetch new data as needed
+            updateCharts(rawData);
+        });
+    </script>
 
 @endsection

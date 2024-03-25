@@ -112,6 +112,8 @@ $(function() {
     $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
         var startDate = picker.startDate;
         var endDate = picker.endDate;
+        console.log('Plage de dates sélectionnée :', startDate.format('D MMM YYYY'), '-', endDate.format('D MMM YYYY'));
+
         performAjaxCall(startDate, endDate);
     });
 });

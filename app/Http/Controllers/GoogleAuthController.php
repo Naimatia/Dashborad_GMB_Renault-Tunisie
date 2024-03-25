@@ -103,8 +103,7 @@ class GoogleAuthController extends Controller
         return view('locations', compact('locations'));
     }
 
-    public function PerfermanceAPI(Request $request)
-    {
+    public function PerfermanceAPI(Request $request){
         // Retrieve query parameters
         $startYear = $request->query('startYear');
         $startMonth = $request->query('startMonth');
@@ -112,6 +111,10 @@ class GoogleAuthController extends Controller
         $endMonth = $request->query('endMonth');
         $startDay = $request->query('startDay');
         $endDay = $request->query('endDay');
+
+        $startLastYear = $startYear - 1;
+        $endLastYear = $endYear - 1;
+
 
 
         if (!$this->refreshTokenIfNeeded()) {
@@ -123,33 +126,54 @@ class GoogleAuthController extends Controller
             return redirect('/')->with('error', 'Access token is not set. Please login again.');
         }
 
-        // Replace this URL with the endpoint for the Performance API
-        $url = "https://businessprofileperformance.googleapis.com/v1/locations/16865183253846802889:fetchMultiDailyMetricsTimeSeries?dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_SEARCH&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_SEARCH&dailyRange.start_date.year={$startYear}&dailyRange.start_date.month={$startMonth}&dailyRange.start_date.day={$startDay}&dailyRange.end_date.year={$endYear}&dailyRange.end_date.month={$endMonth}&dailyRange.end_date.day={$endDay}";
+        // Performance API for this YEAR
+        $currentYearUrl = "https://businessprofileperformance.googleapis.com/v1/locations/8520460341050881890:fetchMultiDailyMetricsTimeSeries?dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_SEARCH&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_SEARCH&dailyRange.start_date.year={$startYear}&dailyRange.start_date.month={$startMonth}&dailyRange.start_date.day={$startDay}&dailyRange.end_date.year={$endYear}&dailyRange.end_date.month={$endMonth}&dailyRange.end_date.day={$endDay}";
 
-        // Make the API call
-        $response = Http::withOptions([
+        // Check if the start year is a leap year and if the start month is February
+        if (($startLastYear % 4 == 0 && $startLastYear % 100 != 0) || $startLastYear % 400 == 0) {
+            if ($startMonth == 2) {
+                // If it's February in a leap year, set the end day to 29
+                $endDay = 29;
+            }
+        } else {
+            if ($startMonth == 2) {
+                // If it's February in a non-leap year, set the end day to 28
+                $endDay = 28;
+            }
+        }
+        // Performance API for last YEAR
+        $lastYearUrl = "https://businessprofileperformance.googleapis.com/v1/locations/8520460341050881890:fetchMultiDailyMetricsTimeSeries?dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_DESKTOP_SEARCH&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_MAPS&dailyMetrics=BUSINESS_IMPRESSIONS_MOBILE_SEARCH&dailyRange.start_date.year={$startLastYear}&dailyRange.start_date.month={$startMonth}&dailyRange.start_date.day={$startDay}&dailyRange.end_date.year={$endLastYear}&dailyRange.end_date.month={$endMonth}&dailyRange.end_date.day={$endDay}";
+
+        // Make the API calls
+        $currentYearResponse = Http::withOptions([
             'verify' => 'E:\PFE package\Dashborad_GMB\cacert.pem',
         ])->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->get($url);
+            'Authorization' => 'Bearer ' . session('google_access_token'),
+        ])->get($currentYearUrl);
 
-        // Check if the call was successful
-        if ($response->failed()) {
-            //    return redirect('/')->with('error', 'Failed to fetch performance data from Google My Business.');
-        }
+        $lastYearResponse = Http::withOptions([
+            'verify' => 'E:\PFE package\Dashborad_GMB\cacert.pem',
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . session('google_access_token'),
+        ])->get($lastYearUrl);
 
-        // Decode the JSON response
-        $performanceData = $response->json();
+
+        // Decode the JSON responses
+        $currentYearPerformanceData = $currentYearResponse->json();
+        $lastYearPerformanceData = $lastYearResponse->json();
 
         // Process the data as needed, e.g., organize for charting
 
         // Return the view with the performance data
         if ($request->ajax()) {
-            // For AJAX requests, return JSON data
-            return response()->json($performanceData);
+            // For AJAX requests, return JSON data for both years
+            return response()->json([
+                'currentYearData' => $currentYearPerformanceData,
+                'lastYearData' => $lastYearPerformanceData
+            ]);
         } else {
-            // For regular requests, return the view
-            return view('fiche', compact('performanceData'));
+            // For regular requests, return the view with both years' data
+            return view('fiche', compact('currentYearPerformanceData', 'lastYearPerformanceData'));
         }
     }
 }
