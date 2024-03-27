@@ -44,11 +44,17 @@
             <!-- /.col -->
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="info-box mb-3">
-                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-thumbs-up"></i></span>
+                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-info-circle"></i>
+
+                    </span>
 
                     <div class="info-box-content">
-                        <span class="info-box-text">Likes</span>
-                        <span class="info-box-number">41,410</span>
+                        <span class="info-box-text">Interactions</span>
+                        <span class="info-box-number">
+                            <span id="currentYearTotalInteraction"></span>
+                            <span class="description-percentage" id="growthRateInteraction"
+                                style="font-weight: normal;"></span>
+                        </span>
                     </div>
                     <!-- /.info-box-content -->
                 </div>
@@ -92,24 +98,13 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Monthly Recap Report</h5>
+                        <h5 class="card-title">Interactions avec la fiche de l'établissement
+                        </h5>
 
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
                             </button>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fas fa-wrench"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <a href="#" class="dropdown-item">Action</a>
-                                    <a href="#" class="dropdown-item">Another action</a>
-                                    <a href="#" class="dropdown-item">Something else here</a>
-                                    <a class="dropdown-divider"></a>
-                                    <a href="#" class="dropdown-item">Separated link</a>
-                                </div>
-                            </div>
                             <button type="button" class="btn btn-tool" data-card-widget="remove">
                                 <i class="fas fa-times"></i>
                             </button>
@@ -120,12 +115,13 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <p class="text-center">
-                                    <strong>Sales: 1 Jan, 2014 - 30 Jul, 2014</strong>
+                                    <strong>Période: <span id="startDateDisplay"></span> - <span
+                                            id="endDateDisplay"></span></strong>
                                 </p>
 
                                 <div class="chart">
                                     <!-- Sales Chart Canvas -->
-                                    <canvas id="salesChart" height="180" style="height: 180px;"></canvas>
+                                    <canvas id="InteractionChart" height="250" style="height: 250px;"></canvas>
                                 </div>
                                 <!-- /.chart-responsive -->
                             </div>
@@ -136,41 +132,60 @@
                                 </p>
 
                                 <div class="progress-group">
-                                    Add Products to Cart
-                                    <span class="float-right"><b>160</b>/200</span>
+                                    Clics vers le site Web effectués
+                                    <span class="float-right"><b id="websiteClicksCount"></b>/<span
+                                            id="cartTotalInteraction1"></span></span>
                                     <div class="progress progress-sm">
-                                        <div class="progress-bar bg-primary" style="width: 80%"></div>
+                                        <div class="progress-bar bg-primary" id="websiteClicksProgressBar"
+                                            style="width: 0%"></div>
                                     </div>
                                 </div>
                                 <!-- /.progress-group -->
 
                                 <div class="progress-group">
-                                    Complete Purchase
-                                    <span class="float-right"><b>310</b>/400</span>
+                                    Appels effectués
+                                    <span class="float-right"><b id="callsCount"></b>/<span
+                                            id="cartTotalInteraction2"></span></span>
                                     <div class="progress progress-sm">
-                                        <div class="progress-bar bg-danger" style="width: 75%"></div>
+                                        <div class="progress-bar bg-danger" id="callsProgressBar" style="width: 0%" title=""></div>
                                     </div>
                                 </div>
 
                                 <!-- /.progress-group -->
                                 <div class="progress-group">
-                                    <span class="progress-text">Visit Premium Page</span>
-                                    <span class="float-right"><b>480</b>/800</span>
+                                    Demandes d'itinéraire effectuées
+                                    <span class="float-right"><b id="itineraireCount"></b>/
+                                    <span id="cartTotalInteraction3"></span></span>
                                     <div class="progress progress-sm">
-                                        <div class="progress-bar bg-success" style="width: 60%"></div>
+                                        <div class="progress-bar bg-warning" id="itineraireProgressBar" style="width: 0%" title="">
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- /.progress-group -->
                                 <div class="progress-group">
-                                    Send Inquiries
-                                    <span class="float-right"><b>250</b>/500</span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-warning" style="width: 50%"></div>
+                                    Réservations effectuées
+                                    <span class="float-right"><b id="reservationsCount"></b>/
+                                        <span id="cartTotalInteraction4"></span></span>
+                                        <div class="progress progress-sm">
+                                        <div class="progress-bar bg-success" id="reservationsProgressBar" style="width: 0%">
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- /.progress-group -->
+
+                                <div class="progress-group">
+                                    Messages envoyés
+                                    <span class="float-right"><b id="messagesCount"></b>/
+                                        <span id="cartTotalInteraction5"></span></span>
+                                        <div class="progress progress-sm">
+                                        <div class="progress-bar bg-danger" id="messagesProgressBar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                            <!-- /.col -->
+
                             <!-- /.col -->
                         </div>
                         <!-- /.row -->
@@ -310,7 +325,7 @@
         }
 
         // Define the updateCharts function here to ensure it has access to all needed variables and functions
-        function updateCharts(currentYearPerformanceData) {
+        function updateCharts(PerformanceData) {
 
             // Initialize objects to store the monthly totals for each category
             const monthlyTotals = {
@@ -321,7 +336,7 @@
             };
 
             // Process the performance data
-            currentYearPerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
+            PerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
                 series.dailyMetricTimeSeries.forEach(metricSeries => {
                     metricSeries.timeSeries.datedValues.forEach(datedValue => {
                         const year = datedValue.date.year;
@@ -332,10 +347,21 @@
                             'BUSINESS_IMPRESSIONS_DESKTOP_MAPS': 'Google Maps-ordinateur',
                             'BUSINESS_IMPRESSIONS_MOBILE_SEARCH': 'Recherche Google-mobile'
                         } [metricSeries.dailyMetric];
+
+                        // Check if metricName is undefined
+                        if (metricName === undefined) {
+                            //  console.warn(`Unknown dailyMetric: ${metricSeries.dailyMetric}`);
+                            return; // Skip this iteration
+                        }
+
                         // Initialize the year if it's not already in the monthlyTotals
+                        if (!monthlyTotals[metricName]) {
+                            monthlyTotals[metricName] = {};
+                        }
                         if (!monthlyTotals[metricName][year]) {
                             monthlyTotals[metricName][year] = {};
                         }
+
                         // Initialize the month if it's not already in the monthlyTotals for the year
                         if (!monthlyTotals[metricName][year][monthName]) {
                             monthlyTotals[metricName][year][monthName] = 0;
@@ -345,7 +371,7 @@
                     });
                 });
             });
-            console.log('Monthly Totals:', monthlyTotals); // Log monthlyTotals to check its structure
+
 
 
             // Generate labels for the line chart
@@ -355,6 +381,7 @@
                     labels.push(`${month} ${year}`);
                 });
             });
+            console.log(monthlyTotals);
 
             // Convert monthly totals to datasets format for Chart.js
             const datasets = Object.entries(monthlyTotals).map(([label, data]) => ({
@@ -363,6 +390,7 @@
                 fill: false,
                 ...colors[label],
             }));
+
 
             // Update the line chart
             myChart.data.labels = labels;
@@ -412,29 +440,52 @@
             }];
             salesChart.update();
 
+            // Appeler cette fonction pour calculer la somme des données d'interaction
+            const interactionData = calculateInteractionTotal(PerformanceData);
 
-            console.log('Sales Data:', salesData); // Log salesData to check its contents
-
-
-            // Initialize the total values for both years
+            // Mettre à jour les données et les étiquettes du graphique d'interaction
+            //   const interactionLabels = Object.keys(interactionData);
+            const newLabels = ['Clics vers site Web', 'Appels', 'Itinéraire', 'Réservation',
+                'Message'
+            ]; // Example new labels
+            const interactionDataset = [{
+                label: 'Interaction',
+                data: Object.values(interactionData),
+                fill: false,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Couleur de fond pour la ligne
+                borderColor: 'rgba(75, 192, 192, 1)', // Couleur de la bordure de la ligne
+                borderWidth: 2
+            }];
+            InteractionChart.data.labels = newLabels;
+            InteractionChart.data.datasets = interactionDataset;
+            InteractionChart.update();
+            // Rate to Imression data
             let currentYearTotal = 0;
             let lastYearTotal = 0;
 
             // Process the performance data for the current year
-            currentYearPerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
+            PerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
                 series.dailyMetricTimeSeries.forEach(metricSeries => {
-                    metricSeries.timeSeries.datedValues.forEach(datedValue => {
-                        currentYearTotal += parseInt(datedValue.value) || 0;
-                    });
+                    if (['BUSINESS_IMPRESSIONS_DESKTOP_SEARCH', 'BUSINESS_IMPRESSIONS_MOBILE_MAPS',
+                            'BUSINESS_IMPRESSIONS_DESKTOP_MAPS', 'BUSINESS_IMPRESSIONS_MOBILE_SEARCH'
+                        ].includes(metricSeries.dailyMetric)) {
+                        metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                            currentYearTotal += parseInt(datedValue.value) || 0;
+                        });
+                    }
                 });
             });
 
             // Process the performance data for the last year
-            currentYearPerformanceData.lastYearData.multiDailyMetricTimeSeries.forEach(series => {
+            PerformanceData.lastYearData.multiDailyMetricTimeSeries.forEach(series => {
                 series.dailyMetricTimeSeries.forEach(metricSeries => {
-                    metricSeries.timeSeries.datedValues.forEach(datedValue => {
-                        lastYearTotal += parseInt(datedValue.value) || 0;
-                    });
+                    if (['BUSINESS_IMPRESSIONS_DESKTOP_SEARCH', 'BUSINESS_IMPRESSIONS_MOBILE_MAPS',
+                            'BUSINESS_IMPRESSIONS_DESKTOP_MAPS', 'BUSINESS_IMPRESSIONS_MOBILE_SEARCH'
+                        ].includes(metricSeries.dailyMetric)) {
+                        metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                            lastYearTotal += parseInt(datedValue.value) || 0;
+                        });
+                    }
                 });
             });
 
@@ -459,7 +510,175 @@
             const Total = document.getElementById('currentYearTotal');
             Total.textContent = currentYearTotal;
 
+            // Rate to Interaction data
+            // Initialize variables to store the total interactions for the current and last year
+            let currentYearInteractionTotal = 0;
+            let lastYearInteractionTotal = 0;
 
+            // Define the interaction metrics
+            const interactionMetrics = ["WEBSITE_CLICKS", "CALL_CLICKS", "BUSINESS_DIRECTION_REQUESTS", "BUSINESS_BOOKINGS",
+                "BUSINESS_CONVERSATIONS"
+            ];
+
+            // Process the performance data for the current year
+            PerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
+                series.dailyMetricTimeSeries.forEach(metricSeries => {
+                    if (interactionMetrics.includes(metricSeries.dailyMetric)) {
+                        metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                            currentYearInteractionTotal += parseInt(datedValue.value) || 0;
+                        });
+                    }
+                });
+            });
+
+            // Process the performance data for the last year
+            PerformanceData.lastYearData.multiDailyMetricTimeSeries.forEach(series => {
+                series.dailyMetricTimeSeries.forEach(metricSeries => {
+                    if (interactionMetrics.includes(metricSeries.dailyMetric)) {
+                        metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                            lastYearInteractionTotal += parseInt(datedValue.value) || 0;
+                        });
+                    }
+                });
+            });
+
+            // Calculate the growth rate for interactions
+            const interactionGrowthRate = ((currentYearInteractionTotal - lastYearInteractionTotal) /
+                lastYearInteractionTotal) * 100;
+
+            // Select the element to display the interaction growth rate
+            const growthRateInteractionDisplay = document.getElementById('growthRateInteraction');
+
+            // Update the text and class based on the growth rate of interactions
+            if (interactionGrowthRate < 0) {
+                growthRateInteractionDisplay.textContent = Math.abs(interactionGrowthRate).toFixed(1);
+                growthRateInteractionDisplay.classList.add('text-danger'); // Add class to display in red
+                growthRateInteractionDisplay.innerHTML += '% <i class="fas fa-caret-down"></i>';
+            } else {
+                growthRateInteractionDisplay.textContent = interactionGrowthRate.toFixed(1);
+                growthRateInteractionDisplay.classList.remove('text-danger');
+                growthRateInteractionDisplay.classList.add('text-success'); // Remove class to display in green
+                growthRateInteractionDisplay.innerHTML += '% <i class="fas fa-caret-up"></i>';
+            }
+
+            // Select the element to display the total interactions for the current year
+            const totalInteractionElement = document.getElementById('currentYearTotalInteraction');
+            totalInteractionElement.textContent = currentYearInteractionTotal;
+
+            // Select the elements to display the total interactions for adding products to the cart
+            const cartTotalInteractionElement1 = document.getElementById('cartTotalInteraction1');
+            cartTotalInteractionElement1.textContent = currentYearInteractionTotal;
+
+            // Select the elements to display the total interactions for completing purchases
+            const cartTotalInteractionElement2 = document.getElementById('cartTotalInteraction2');
+            cartTotalInteractionElement2.textContent = currentYearInteractionTotal;
+            const cartTotalInteractionElement3 = document.getElementById('cartTotalInteraction3');
+            cartTotalInteractionElement3.textContent = currentYearInteractionTotal;
+            const cartTotalInteractionElement4 = document.getElementById('cartTotalInteraction4');
+            cartTotalInteractionElement4.textContent = currentYearInteractionTotal;
+            const cartTotalInteractionElement5 = document.getElementById('cartTotalInteraction5');
+            cartTotalInteractionElement5.textContent = currentYearInteractionTotal;
+
+
+            // Sélectionner tous les éléments où vous voulez afficher les totaux d'interaction
+            const interactionElements = document.querySelectorAll('.progress-group b');
+
+            // Mettre à jour le contenu de chaque élément avec les totaux d'interaction correspondants
+            interactionElements.forEach((element, index) => {
+                // Le tableau interactionMetrics contient les noms des interactions dans le même ordre que les éléments
+                const interactionMetric = interactionMetrics[index];
+                // Mettre à jour le contenu de l'élément avec le total d'interaction correspondant
+                element.textContent = interactionData[interactionMetric];
+            });
+
+            const interactionPercentage = calculateInteractionPercentage(PerformanceData, currentYearInteractionTotal);
+
+            // Mettre à jour la barre de progression des clics vers le site Web
+            const websiteClicksProgressBar = document.getElementById('websiteClicksProgressBar');
+            websiteClicksProgressBar.style.width = interactionPercentage.WEBSITE_CLICKS + '%';
+            websiteClicksProgressBar.innerText = interactionPercentage.WEBSITE_CLICKS + '%';
+            websiteClicksProgressBar.title = interactionPercentage.WEBSITE_CLICKS + '%';
+
+
+
+            // Mettre à jour la barre de progression des appels effectués
+            const callsProgressBar = document.getElementById('callsProgressBar');
+            callsProgressBar.style.width = interactionPercentage.CALL_CLICKS + '%';
+            callsProgressBar.innerText = interactionPercentage.CALL_CLICKS + '%';
+            callsProgressBar.title = interactionPercentage.CALL_CLICKS + '%';
+
+
+            // Mettre à jour la barre de progression des demandes d'itinéraire effectuées
+            const itineraireProgressBar = document.getElementById('itineraireProgressBar');
+            const itinerairePercentage = interactionPercentage.BUSINESS_DIRECTION_REQUESTS;
+            itineraireProgressBar.style.width = itinerairePercentage + '%';
+            itineraireProgressBar.innerText = itinerairePercentage + '%';
+            itineraireProgressBar.title = itinerairePercentage + '%'; // Ajouter le pourcentage en tant que tooltip (hover)
+
+            // Mettre à jour la barre de progression des réservations effectuées
+            const reservationsProgressBar = document.getElementById('reservationsProgressBar');
+            reservationsProgressBar.style.width = interactionPercentage.BUSINESS_BOOKINGS + '%';
+            reservationsProgressBar.innerText = interactionPercentage.BUSINESS_BOOKINGS + '%';
+            reservationsProgressBar.title = interactionPercentage.BUSINESS_BOOKINGS + '%';
+
+
+            // Mettre à jour la barre de progression des messages envoyés
+            const messagesProgressBar = document.getElementById('messagesProgressBar');
+            messagesProgressBar.style.width = interactionPercentage.BUSINESS_CONVERSATIONS + '%';
+            messagesProgressBar.innerText = interactionPercentage.BUSINESS_CONVERSATIONS + '%';
+            messagesProgressBar.title = interactionPercentage.BUSINESS_CONVERSATIONS + '%';
+
+
+        }
+
+        // Ajouter cette fonction pour calculer la somme des données d'interaction
+        function calculateInteractionTotal(PerformanceData) {
+            const interactionMetrics = ["WEBSITE_CLICKS", "CALL_CLICKS", "BUSINESS_DIRECTION_REQUESTS", "BUSINESS_BOOKINGS",
+                "BUSINESS_CONVERSATIONS"
+            ];
+            const interactionData = {};
+
+            interactionMetrics.forEach(metric => {
+                let sum = 0;
+                PerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
+                    series.dailyMetricTimeSeries.forEach(metricSeries => {
+                        if (metricSeries.dailyMetric === metric) {
+                            metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                                sum += parseInt(datedValue.value) || 0;
+                            });
+                        }
+                    });
+                });
+                interactionData[metric] = sum;
+            });
+
+            return interactionData;
+        }
+
+        // Add this function to calculate the percentage of each interaction type relative to the currentYearInteractionTotal
+        function calculateInteractionPercentage(PerformanceData, currentYearInteractionTotal) {
+            const interactionMetrics = ["WEBSITE_CLICKS", "CALL_CLICKS", "BUSINESS_DIRECTION_REQUESTS", "BUSINESS_BOOKINGS",
+                "BUSINESS_CONVERSATIONS"
+            ];
+            const interactionData = {};
+
+            interactionMetrics.forEach(metric => {
+                let sum = 0;
+                PerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
+                    series.dailyMetricTimeSeries.forEach(metricSeries => {
+                        if (metricSeries.dailyMetric === metric) {
+                            metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                                sum += parseInt(datedValue.value) || 0;
+                            });
+                        }
+                    });
+                });
+                // Calculate the percentage
+                const percentage = (sum / currentYearInteractionTotal) * 100;
+                interactionData[metric] = percentage.toFixed(2); // Round to 2 decimal places
+            });
+
+            return interactionData;
         }
 
         // Render the charts
@@ -491,10 +710,26 @@
                 },
             });
 
+            const InteractionCtx = document.getElementById('InteractionChart').getContext('2d');
+            window.InteractionChart = new Chart(InteractionCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                    }
+                },
+            });
 
             // Update charts with rawData or fetch new data as needed
             updateCharts(rawData);
         });
     </script>
-
 @endsection

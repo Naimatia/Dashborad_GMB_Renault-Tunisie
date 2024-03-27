@@ -43,82 +43,89 @@
 
 <!-- date period -->
 <script>
-$(function() {
-    // Stocker la date initiale
-    var initialStartDate = moment().startOf('month');
-    var initialEndDate = moment().endOf('month');
+    $(function() {
+        // Stocker la date initiale
+        var initialStartDate = moment().startOf('month');
+        var initialEndDate = moment().endOf('month');
 
-    $('#dateRangePicker').daterangepicker({
-        opens: 'left',
-        showDropdowns: true, // Allows dropdowns for year and month
-        autoApply: true,
-        startDate: initialStartDate, // Utiliser la date initiale
-        endDate: initialEndDate, // Utiliser la date initiale
-        locale: {
-            format: 'MMM YYYY', // Formatting to show only month and year
-            applyLabel: 'Appliquer',
-            cancelLabel: 'Annuler',
-            fromLabel: 'De',
-            toLabel: 'À',
-            customRangeLabel: 'Période personnalisée',
-            daysOfWeek: ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'],
-            monthNames: [
-                'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-            ],
-            firstDay: 1
-        },
-        ranges: {
-            'Ce mois': [moment().startOf('month'), moment().endOf('month')],
-            'Le mois dernier': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-            'Les 6 derniers mois': [moment().subtract(6, 'months').startOf('month'), moment().endOf('month')],
-            'L’année dernière': [moment().subtract(1, 'year').startOf('month'), moment().endOf('month')],
-        },
-        showCustomRangeLabel: false,
-        linkedCalendars: false
-    });
-
-    // Set the initial value of the input to "Ce mois"
-    $('#dateRangePicker').val(initialStartDate.format('MMM YYYY') + ' - ' + initialEndDate.format('MMM YYYY'));
-
-    // Fonction pour effectuer l'appel AJAX
-    function performAjaxCall(startDate, endDate) {
-        $.ajax({
-            url: 'http://localhost:8000/fiche',
-            type: 'GET', // ou 'POST'
-            data: {
-                startYear: startDate.format('YYYY'),
-                startMonth: startDate.format('M'),
-                endYear: endDate.format('YYYY'),
-                endMonth: endDate.format('M'),
-                startDay: startDate.format('D'),
-                endDay: endDate.format('D'),
-                _token: $('meta[name="csrf-token"]').attr('content')
+        $('#dateRangePicker').daterangepicker({
+            opens: 'left',
+            showDropdowns: true, // Allows dropdowns for year and month
+            autoApply: true,
+            startDate: initialStartDate, // Utiliser la date initiale
+            endDate: initialEndDate, // Utiliser la date initiale
+            locale: {
+                format: 'MMM YYYY', // Formatting to show only month and year
+                applyLabel: 'Appliquer',
+                cancelLabel: 'Annuler',
+                fromLabel: 'De',
+                toLabel: 'À',
+                customRangeLabel: 'Période personnalisée',
+                daysOfWeek: ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'],
+                monthNames: [
+                    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+                ],
+                firstDay: 1
             },
-            success: function(response) {
-                console.log('Performance data:', response);
-                updateCharts(response); // Vous devez définir cette fonction pour mettre à jour les graphiques avec les données reçues
+            ranges: {
+                'Ce mois': [moment().startOf('month'), moment().endOf('month')],
+                'Le mois dernier': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1,
+                    'month').endOf('month')],
+                'Les 6 derniers mois': [moment().subtract(6, 'months').startOf('month'), moment().endOf(
+                    'month')],
+                'L’année dernière': [moment().subtract(1, 'year').startOf('month'), moment().endOf(
+                    'month')],
             },
-            error: function(error) {
-                console.log('Error fetching performance data:', error);
-            }
+            showCustomRangeLabel: false,
+            linkedCalendars: false
         });
-    }
 
-    // Appeler l'AJAX lors de l'initialisation de la page
-    performAjaxCall(initialStartDate, initialEndDate);
+        // Set the initial value of the input to "Ce mois"
+        $('#dateRangePicker').val(initialStartDate.format('MMM YYYY') + ' - ' + initialEndDate.format(
+            'MMM YYYY'));
 
-    // Événement de changement de la plage de dates sélectionnée
-    $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
-        var startDate = picker.startDate;
-        var endDate = picker.endDate;
-        console.log('Plage de dates sélectionnée :', startDate.format('D MMM YYYY'), '-', endDate.format('D MMM YYYY'));
+        // Fonction pour effectuer l'appel AJAX
+        function performAjaxCall(startDate, endDate) {
+            $.ajax({
+                url: 'http://localhost:8000/fiche',
+                type: 'GET', // ou 'POST'
+                data: {
+                    startYear: startDate.format('YYYY'),
+                    startMonth: startDate.format('M'),
+                    endYear: endDate.format('YYYY'),
+                    endMonth: endDate.format('M'),
+                    startDay: startDate.format('D'),
+                    endDay: endDate.format('D'),
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    console.log('Performance data:', response);
+                    updateCharts(
+                    response); // Vous devez définir cette fonction pour mettre à jour les graphiques avec les données reçues
+                    // Update the startDate and endDate in the view
+                    $('#startDateDisplay').text(response.startDate);
+                    $('#endDateDisplay').text(response.endDate);
+                },
+                error: function(error) {
+                    console.log('Error fetching performance data:', error);
+                }
+            });
+        }
 
-        performAjaxCall(startDate, endDate);
+        // Appeler l'AJAX lors de l'initialisation de la page
+        performAjaxCall(initialStartDate, initialEndDate);
+
+        // Événement de changement de la plage de dates sélectionnée
+        $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+            var startDate = picker.startDate;
+            var endDate = picker.endDate;
+            console.log('Plage de dates sélectionnée :', startDate.format('D MMM YYYY'), '-', endDate
+                .format('D MMM YYYY'));
+
+            performAjaxCall(startDate, endDate);
+        });
     });
-});
-
-
 </script>
 
 @yield('scripts')
