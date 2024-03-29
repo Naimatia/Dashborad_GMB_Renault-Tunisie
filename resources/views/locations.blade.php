@@ -1,120 +1,154 @@
 @extends('layouts.master')
 
 @section('title')
-    Location
+    Établissement
 @stop
 
 @section('css')
     <!-- Include Bootstrap 4 CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Include DataTables CSS for Bootstrap 4 -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
-@endsection
+  <!-- DataTables -->
+  <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <link rel="stylesheet" href="../../plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+  <style>
+    /* Hover effect on table rows */
+    table tr:hover {
+        background-color: #f5f5f5; /* Change the background color on hover */
+    }
+    </style>
+  @endsection
 
 @section('title_head')
     {{ count($locations['locations']) }} Établissement
 @endsection
 
 @section('title_page1')
-    home
+    Accueil
 @endsection
 
 @section('title_page2')
-    location
+    Établissements
 @endsection
 
 @section('content')
-    @if(!empty($locations['locations']))
 
-        <div class="table-responsive">
-            <table id="locationsTable" class="table table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nom de l'établissement</th>
-                        <th>Ville</th>
-                        <th>Addresse</th>
-                        <th>RegionCode</th>
-                        <th>Code Postal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($locations['locations'] as $location)
-                    <tr data-id="{{ explode('/', $location['name'])[1] }}" data-title="{{ $location['title'] }}">
-                        <td>{{ $location['title'] ?? 'No Title' }}</td>
-                            <td>{{ $location['storefrontAddress']['locality'] ?? 'No Locality' }}</td>
-                            <td>{{ $location['storefrontAddress']['addressLines'][0] ?? 'No Address' }}</td>
-                            <td>{{ $location['storefrontAddress']['regionCode'] ?? 'No Region Code' }}</td>
-                            <td>{{ $location['storefrontAddress']['postalCode'] ?? 'No Postal Code' }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+    @if (!empty($locations['locations']))
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <!-- /.card-header -->
+                            <div class="card-body">
+                                <table id="locationsTable" class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nom de l'établissement</th>
+                                            <th>Ville</th>
+                                            <th>Addresse</th>
+                                            <th>RegionCode</th>
+                                            <th>Code Postal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($locations['locations'] as $location)
+                                            <tr data-id="{{ explode('/', $location['name'])[1] }}"
+                                                data-title="{{ $location['title'] }}">
+                                                <td>{{ $location['title'] ?? 'No Title' }}</td>
+                                                <td>{{ $location['storefrontAddress']['locality'] ?? 'No Locality' }}</td>
+                                                <td>{{ $location['storefrontAddress']['addressLines'][0] ?? 'No Address' }}
+                                                </td>
+                                                <td>{{ $location['storefrontAddress']['regionCode'] ?? 'No Region Code' }}
+                                                </td>
+                                                <td>{{ $location['storefrontAddress']['postalCode'] ?? 'No Postal Code' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Nom de l'établissement</th>
+                                            <th>Ville</th>
+                                            <th>Addresse</th>
+                                            <th>RegionCode</th>
+                                            <th>Code Postal</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+        </section>
     @else
         <p>No locations found.</p>
     @endif
 @endsection
 
 @section('scripts')
-    <!-- Include jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Include DataTables JavaScript -->
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <!-- Include DataTables Bootstrap 4 JavaScript -->
-    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+    </script>
+    <!-- jQuery -->
+    <script src="../../plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables  & Plugins -->
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="../../plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="../../plugins/jszip/jszip.min.js"></script>
+    <script src="../../plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="../../plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="../../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="../../plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="../../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <script>
+        $(function() {
+            $("#locationsTable").DataTable({
+                "responsive": true,
+                "lengthChange": false,
+                "autoWidth": false,
+                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+        });
+    </script>
+
     <script>
         $(document).ready(function() {
-            $('#locationsTable').DataTable({
-                "language": {
-                    "sProcessing": "Traitement en cours...",
-                    "sLengthMenu": "Afficher _MENU_ &eacute;l&eacute;ments",
-                    "sZeroRecords": "Aucun résultat trouvé",
-                    "sEmptyTable": "Aucune donnée disponible dans le tableau",
-                    "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
-                    "sInfoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
-                    "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
-                    "sInfoPostFix": "",
-                    "sSearch": "Rechercher&nbsp;:",
-                    "sUrl": "",
-                    "sInfoThousands": ",",
-                    "sLoadingRecords": "Chargement en cours...",
-                    "oPaginate": {
-                        "sFirst": "Premier",
-                        "sLast": "Dernier",
-                        "sNext": "Suivant",
-                        "sPrevious": "Précédent"
-                    },
-                    "oAria": {
-                        "sSortAscending": ": activer pour trier la colonne par ordre croissant",
-                        "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+            $('#locationsTable tbody').on('click', 'tr', function() {
+                var id = $(this).data('id');
+
+                // Vérifier si l'ID est valide
+                if (id) {
+                    // Construct the URL correctly without duplicating the port number
+                    var url = new URL('/fiche/' + id, window.location.origin);
+                    // Ajouter le titre à l'URL si présent dans les paramètres de requête
+                    var title = $(this).data('title');
+                    if (title) {
+                        url.searchParams.append('title', title);
                     }
+                    // Utiliser window.location.href pour naviguer
+                    window.location.href = url.toString();
+                    // Correct way to navigate
+                } else {
+                    console.error("Identifiant du lieu non trouvé.");
+                    // Afficher un message d'erreur ou prendre une autre action appropriée si l'identifiant du lieu n'est pas trouvé
                 }
             });
         });
-
-        // route vers fiche
     </script>
-
-<script>
-  $(document).ready(function() {
-    $('#locationsTable tbody').on('click', 'tr', function() {
-        var id = $(this).data('id');
-        var title = $(this).data('title');
-
-        // Construct the URL correctly without duplicating the port number
-        var url = new URL('/fiche/' + id, window.location.origin);
-        if (title) {
-            url.searchParams.append('title', title);
-        }
-
-        // Use window.location.href to navigate
-        window.location.href = url.toString(); // Correct way to navigate
-    });
-});
-
-
-
-</script>
-
 
 @endsection

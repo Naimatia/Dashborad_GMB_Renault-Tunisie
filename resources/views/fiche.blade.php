@@ -2,22 +2,25 @@
 
 
 @section('title')
-    Home
+    Fiche
 @stop
 
 @section('css')
 @endsection
 
 @section('title_head')
-    Bienvenue
+    @if (request()->has('title'))
+        BIENVENUE {{ request()->get('title') }}
+    @endif
 @endsection
 
+
 @section('title_page1')
-    home
+    Établissement
 @endsection
 
 @section('title_page2')
-    location
+    Perfermances
 @endsection
 
 @section('content')
@@ -67,11 +70,14 @@
 
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="info-box mb-3">
-                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
+                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-external-link-alt"></i></span>
 
                     <div class="info-box-content">
-                        <span class="info-box-text">Sales</span>
-                        <span class="info-box-number">760</span>
+                        <span class="info-box-text">Clic Vers Site Web</span>
+                        <span class="info-box-number">
+                            <span id="TotalWebInteraction"></span>
+                            <span class="description-percentage" id="growthRateWeb" style="font-weight: normal;"></span>
+                        </span>
                     </div>
                     <!-- /.info-box-content -->
                 </div>
@@ -80,11 +86,15 @@
             <!-- /.col -->
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="info-box mb-3">
-                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
+                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-book"></i></span>
 
                     <div class="info-box-content">
-                        <span class="info-box-text">New Members</span>
-                        <span class="info-box-number">2,000</span>
+                        <span class="info-box-text">Réservation</span>
+                        <span class="info-box-number">
+                            <span id="TotalConversationInteraction"></span>
+                            <span class="description-percentage" id="growthRateReservation"
+                                style="font-weight: normal;"></span>
+                        </span>
                     </div>
                     <!-- /.info-box-content -->
                 </div>
@@ -128,7 +138,7 @@
                             <!-- /.col -->
                             <div class="col-md-4">
                                 <p class="text-center">
-                                    <strong>Goal Completion</strong>
+                                    <strong>Statistiques des Interactions</strong>
                                 </p>
 
                                 <div class="progress-group">
@@ -147,7 +157,8 @@
                                     <span class="float-right"><b id="callsCount"></b>/<span
                                             id="cartTotalInteraction2"></span></span>
                                     <div class="progress progress-sm">
-                                        <div class="progress-bar bg-danger" id="callsProgressBar" style="width: 0%" title=""></div>
+                                        <div class="progress-bar bg-danger" id="callsProgressBar" style="width: 0%"
+                                            title=""></div>
                                     </div>
                                 </div>
 
@@ -155,9 +166,10 @@
                                 <div class="progress-group">
                                     Demandes d'itinéraire effectuées
                                     <span class="float-right"><b id="itineraireCount"></b>/
-                                    <span id="cartTotalInteraction3"></span></span>
+                                        <span id="cartTotalInteraction3"></span></span>
                                     <div class="progress progress-sm">
-                                        <div class="progress-bar bg-warning" id="itineraireProgressBar" style="width: 0%" title="">
+                                        <div class="progress-bar bg-warning" id="itineraireProgressBar" style="width: 0%"
+                                            title="">
                                         </div>
                                     </div>
                                 </div>
@@ -167,8 +179,9 @@
                                     Réservations effectuées
                                     <span class="float-right"><b id="reservationsCount"></b>/
                                         <span id="cartTotalInteraction4"></span></span>
-                                        <div class="progress progress-sm">
-                                        <div class="progress-bar bg-success" id="reservationsProgressBar" style="width: 0%">
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-success" id="reservationsProgressBar"
+                                            style="width: 0%">
                                         </div>
                                     </div>
                                 </div>
@@ -178,7 +191,7 @@
                                     Messages envoyés
                                     <span class="float-right"><b id="messagesCount"></b>/
                                         <span id="cartTotalInteraction5"></span></span>
-                                        <div class="progress progress-sm">
+                                    <div class="progress progress-sm">
                                         <div class="progress-bar bg-danger" id="messagesProgressBar" style="width: 0%">
                                         </div>
                                     </div>
@@ -192,49 +205,55 @@
                     </div>
                     <!-- ./card-body -->
                     <div class="card-footer">
-                        <div class="row">
-                            <div class="col-sm-3 col-6">
+                        <div class="row justify-content-center text-center">
+                            <div class="col-sm-2 col-6">
                                 <div class="description-block border-right">
-                                    <span class="description-percentage text-success"><i class="fas fa-caret-up"></i>
-                                        17%</span>
-                                    <h5 class="description-header">$35,210.43</h5>
-                                    <span class="description-text">TOTAL REVENUE</span>
+                                    <span class="description-percentage" data-interaction="WEBSITE_CLICKS"></span>
+                                    <h5 class="description-header"></h5>
+                                    <span class="description-text">Clic Web Total</span>
                                 </div>
                                 <!-- /.description-block -->
                             </div>
                             <!-- /.col -->
-                            <div class="col-sm-3 col-6">
+                            <div class="col-sm-2 col-6">
                                 <div class="description-block border-right">
-                                    <span class="description-percentage text-warning"><i class="fas fa-caret-left"></i>
-                                        0%</span>
-                                    <h5 class="description-header">$10,390.90</h5>
-                                    <span class="description-text">TOTAL COST</span>
+                                    <span class="description-percentage" data-interaction="CALL_CLICKS"></span>
+                                    <h5 class="description-header"></h5>
+                                    <span class="description-text">Appel Total</span>
+                                </div>
+                                <!-- /.description-block -->
+                            </div>
+                            <div class="col-sm-2 col-6">
+                                <div class="description-block border-right">
+                                    <span class="description-percentage"
+                                        data-interaction="BUSINESS_DIRECTION_REQUESTS"></span>
+                                    <h5 class="description-header"></h5>
+                                    <span class="description-text">Itinéraire Total</span>
                                 </div>
                                 <!-- /.description-block -->
                             </div>
                             <!-- /.col -->
-                            <div class="col-sm-3 col-6">
+                            <div class="col-sm-2 col-6">
                                 <div class="description-block border-right">
-                                    <span class="description-percentage text-success"><i class="fas fa-caret-up"></i>
-                                        20%</span>
-                                    <h5 class="description-header">$24,813.53</h5>
-                                    <span class="description-text">TOTAL PROFIT</span>
+                                    <span class="description-percentage" data-interaction="BUSINESS_BOOKINGS"></span>
+                                    <h5 class="description-header"></h5>
+                                    <span class="description-text">Réservation Total</span>
                                 </div>
                                 <!-- /.description-block -->
                             </div>
                             <!-- /.col -->
-                            <div class="col-sm-3 col-6">
+                            <div class="col-sm-2 col-6">
                                 <div class="description-block">
-                                    <span class="description-percentage text-danger"><i class="fas fa-caret-down"></i>
-                                        18%</span>
-                                    <h5 class="description-header">1200</h5>
-                                    <span class="description-text">GOAL COMPLETIONS</span>
+                                    <span class="description-percentage" data-interaction="BUSINESS_CONVERSATIONS"></span>
+                                    <h5 class="description-header"></h5>
+                                    <span class="description-text">Message Total</span>
                                 </div>
                                 <!-- /.description-block -->
                             </div>
                         </div>
                         <!-- /.row -->
                     </div>
+
                     <!-- /.card-footer -->
                 </div>
                 <!-- /.card -->
@@ -554,30 +573,28 @@
                 growthRateInteractionDisplay.textContent = Math.abs(interactionGrowthRate).toFixed(1);
                 growthRateInteractionDisplay.classList.add('text-danger'); // Add class to display in red
                 growthRateInteractionDisplay.innerHTML += '% <i class="fas fa-caret-down"></i>';
-            } else {
+            } else if (interactionGrowthRate > 0)  {
                 growthRateInteractionDisplay.textContent = interactionGrowthRate.toFixed(1);
                 growthRateInteractionDisplay.classList.remove('text-danger');
                 growthRateInteractionDisplay.classList.add('text-success'); // Remove class to display in green
                 growthRateInteractionDisplay.innerHTML += '% <i class="fas fa-caret-up"></i>';
+            } else {
+                growthRateInteractionDisplay.textContent = '0';
+                growthRateInteractionDisplay.classList.add('text-warning');
+                growthRateInteractionDisplay.innerHTML += '% <i class="fas fa-caret-left"></i>';
+
             }
 
             // Select the element to display the total interactions for the current year
             const totalInteractionElement = document.getElementById('currentYearTotalInteraction');
             totalInteractionElement.textContent = currentYearInteractionTotal;
 
-            // Select the elements to display the total interactions for adding products to the cart
-            const cartTotalInteractionElement1 = document.getElementById('cartTotalInteraction1');
-            cartTotalInteractionElement1.textContent = currentYearInteractionTotal;
+            // Sélectionner tous les éléments avec l'ID 'cartTotalInteraction' suivi d'un numéro
+            for (let i = 1; i <= 5; i++) {
+                const cartTotalInteractionElement = document.getElementById(`cartTotalInteraction${i}`);
+                cartTotalInteractionElement.textContent = currentYearInteractionTotal;
+            }
 
-            // Select the elements to display the total interactions for completing purchases
-            const cartTotalInteractionElement2 = document.getElementById('cartTotalInteraction2');
-            cartTotalInteractionElement2.textContent = currentYearInteractionTotal;
-            const cartTotalInteractionElement3 = document.getElementById('cartTotalInteraction3');
-            cartTotalInteractionElement3.textContent = currentYearInteractionTotal;
-            const cartTotalInteractionElement4 = document.getElementById('cartTotalInteraction4');
-            cartTotalInteractionElement4.textContent = currentYearInteractionTotal;
-            const cartTotalInteractionElement5 = document.getElementById('cartTotalInteraction5');
-            cartTotalInteractionElement5.textContent = currentYearInteractionTotal;
 
 
             // Sélectionner tous les éléments où vous voulez afficher les totaux d'interaction
@@ -627,6 +644,143 @@
             messagesProgressBar.style.width = interactionPercentage.BUSINESS_CONVERSATIONS + '%';
             messagesProgressBar.innerText = interactionPercentage.BUSINESS_CONVERSATIONS + '%';
             messagesProgressBar.title = interactionPercentage.BUSINESS_CONVERSATIONS + '%';
+
+            // Sélectionner tous les éléments où vous voulez afficher les totaux d'interaction
+            const h5Elements = document.querySelectorAll('.description-header');
+
+            // Mettre à jour le contenu de chaque élément avec les totaux d'interaction correspondants
+            h5Elements.forEach((element, index) => {
+                // Le tableau interactionMetrics contient les noms des interactions dans le même ordre que les éléments
+                const interactionMetric = interactionMetrics[index];
+                // Mettre à jour le contenu de l'élément avec le total d'interaction correspondant
+                element.textContent = interactionData[interactionMetric];
+            });
+
+            const InteractionGrowthRate = calculateInteractionGrowthRate(PerformanceData);
+            console.log(InteractionGrowthRate);
+            // Sélectionner les éléments où vous souhaitez afficher les données de croissance
+            const growthElements = document.querySelectorAll('.card-footer .description-percentage');
+
+            // Mettre à jour le contenu de chaque élément avec les données de croissance correspondantes
+            Object.entries(InteractionGrowthRate).forEach(([interaction, percentage]) => {
+                const growthElement = Array.from(growthElements).find(element => {
+                    return element.dataset.interaction === interaction;
+                });
+
+                if (growthElement) {
+                    if (isNaN(parseFloat(percentage))) {
+                        growthElement.textContent = 'N/A'; // Afficher N/A si la valeur n'est pas un nombre
+                        growthElement.classList.add('text-warning'); // Ajouter la classe pour afficher en vert
+
+                    } else {
+                        const growthRate = parseFloat(percentage);
+                        if (growthRate < 0) {
+                            growthElement.innerHTML =
+                                `<i class="fas fa-caret-down"></i> ${Math.abs(growthRate).toFixed(1)}%`;
+                            growthElement.classList.add(
+                                'text-danger'); // Ajouter la classe pour afficher en orange
+                        } else if (growthRate > 0) {
+                            growthElement.innerHTML =
+                                `<i class="fas fa-caret-up"></i> ${Math.abs(growthRate).toFixed(1)}%`;
+                            growthElement.classList.remove('text-danger');
+                            growthElement.classList.add('text-success'); // Ajouter la classe pour afficher en vert
+                        } else {
+                            growthElement.textContent = '0%';
+                            growthElement.classList.add('text-warning'); // Ajouter la classe pour afficher en vert
+                        }
+                    }
+                }
+
+            });
+            // statistique de Clic Vers Site Web
+            const growthRateWebElement = document.getElementById('growthRateWeb');
+
+            // Vérifier si la croissance des clics vers le site web est disponible dans InteractionGrowthRate
+            if (InteractionGrowthRate.hasOwnProperty('WEBSITE_CLICKS')) {
+                const growthRate = InteractionGrowthRate['WEBSITE_CLICKS'];
+                if (!isNaN(parseFloat(growthRate))) {
+                    // Si le taux de croissance est un nombre
+                    if (growthRate < 0) {
+                        growthRateWebElement.innerHTML =
+                            `<i class="fas fa-caret-down"></i> ${Math.abs(growthRate).toFixed(1)}%`;
+                        growthRateWebElement.classList.add('text-danger');
+                    } else if (growthRate > 0) {
+                        growthRateWebElement.innerHTML =
+                            `<i class="fas fa-caret-up"></i> ${Math.abs(growthRate).toFixed(1)}%`;
+                        growthRateWebElement.classList.remove('text-danger');
+                        growthRateWebElement.classList.add('text-success');
+                    } else {
+                        growthRateWebElement.textContent = '0%';
+                    }
+                } else {
+                    // Si la croissance n'est pas un nombre
+                    growthRateWebElement.textContent = 'N/A';
+                    growthRateWebElement.classList.add('text-warning');
+                }
+            } else {
+                // Si les données de croissance pour les clics vers le site web ne sont pas disponibles
+                growthRateWebElement.textContent = 'N/A';
+                growthRateWebElement.classList.add('text-warning');
+            }
+
+            const totalWebInteractionElement = document.getElementById('TotalWebInteraction');
+
+            // Vérifier si le total des interactions avec le site web est disponible dans interactionData
+            if (interactionData.hasOwnProperty('WEBSITE_CLICKS')) {
+                const totalWebInteraction = interactionData['WEBSITE_CLICKS'];
+                // Mettre à jour le contenu avec le total des interactions avec le site web
+                totalWebInteractionElement.textContent = totalWebInteraction;
+            } else {
+                // Si les données du total des interactions avec le site web ne sont pas disponibles
+                totalWebInteractionElement.textContent = 'N/A';
+                totalWebInteractionElement.classList.add('text-warning');
+            }
+            // statistique des Reservation
+            // Statistiques des Conversations Commerciales
+            const growthRateReservationElement = document.getElementById('growthRateReservation');
+
+            // Vérifier si la croissance des conversations commerciales est disponible dans InteractionGrowthRate
+            if (InteractionGrowthRate.hasOwnProperty('BUSINESS_BOOKINGS')) {
+                const growthRate = InteractionGrowthRate['BUSINESS_BOOKINGS'];
+                if (!isNaN(parseFloat(growthRate))) {
+                    // Si le taux de croissance est un nombre
+                    if (growthRate < 0) {
+                        growthRateReservationElement.innerHTML =
+                            `<i class="fas fa-caret-down"></i> ${Math.abs(growthRate).toFixed(1)}%`;
+                        growthRateReservationElement.classList.add('text-danger');
+                    } else if (growthRate > 0) {
+                        growthRateReservationElement.innerHTML =
+                            `<i class="fas fa-caret-up"></i> ${Math.abs(growthRate).toFixed(1)}%`;
+                        growthRateReservationElement.classList.remove('text-danger');
+                        growthRateReservationElement.classList.add('text-success');
+                    } else {
+                        growthRateReservationElement.textContent = '0%';
+                    }
+                } else {
+                    // Si la croissance n'est pas un nombre
+                    growthRateReservationElement.textContent = 'N/A';
+                    growthRateReservationElement.classList.add('text-warning');
+                }
+            } else {
+                // Si les données de croissance pour les conversations commerciales ne sont pas disponibles
+                growthRateReservationElement.textContent = 'N/A';
+                growthRateReservationElement.classList.add('text-warning');
+            }
+
+            // Total des Interactions Commerciales avec le Site Web
+            const totalConversationInteractionElement = document.getElementById('TotalConversationInteraction');
+
+            // Vérifier si le total des interactions commerciales avec le site web est disponible dans interactionData
+            if (interactionData.hasOwnProperty('BUSINESS_BOOKINGS')) {
+                const totalConversationInteraction = interactionData['BUSINESS_BOOKINGS'];
+                // Mettre à jour le contenu avec le total des interactions commerciales avec le site web
+                totalConversationInteractionElement.textContent = totalConversationInteraction;
+            } else {
+                // Si les données du total des interactions commerciales avec le site web ne sont pas disponibles
+                totalConversationInteractionElement.textContent = 'N/A';
+                totalConversationInteractionElement.classList.add('text-warning');
+            }
+
 
 
         }
@@ -680,6 +834,51 @@
 
             return interactionData;
         }
+
+        // Ajouter cette fonction pour calculer le taux de croissance entre l'année en cours et l'année précédente pour chaque type d'interaction
+        function calculateInteractionGrowthRate(PerformanceData) {
+            const interactionMetrics = ["WEBSITE_CLICKS", "CALL_CLICKS", "BUSINESS_DIRECTION_REQUESTS", "BUSINESS_BOOKINGS",
+                "BUSINESS_CONVERSATIONS"
+            ];
+            const interactionGrowthRates = {};
+
+            // Parcourir les métriques d'interaction
+            interactionMetrics.forEach(metric => {
+                // Initialiser les totaux pour l'année en cours et l'année précédente
+                let currentYearTotal = 0;
+                let lastYearTotal = 0;
+
+                // Calculer le total pour l'année en cours
+                PerformanceData.currentYearData.multiDailyMetricTimeSeries.forEach(series => {
+                    series.dailyMetricTimeSeries.forEach(metricSeries => {
+                        if (metricSeries.dailyMetric === metric) {
+                            metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                                currentYearTotal += parseInt(datedValue.value) || 0;
+                            });
+                        }
+                    });
+                });
+
+                // Calculer le total pour l'année précédente
+                PerformanceData.lastYearData.multiDailyMetricTimeSeries.forEach(series => {
+                    series.dailyMetricTimeSeries.forEach(metricSeries => {
+                        if (metricSeries.dailyMetric === metric) {
+                            metricSeries.timeSeries.datedValues.forEach(datedValue => {
+                                lastYearTotal += parseInt(datedValue.value) || 0;
+                            });
+                        }
+                    });
+                });
+
+                // Calculer le taux de croissance
+                const growthRate = ((currentYearTotal - lastYearTotal) / lastYearTotal) * 100;
+                interactionGrowthRates[metric] = growthRate.toFixed(1); // Arrondir à une décimale
+
+            });
+
+            return interactionGrowthRates;
+        }
+
 
         // Render the charts
         document.addEventListener('DOMContentLoaded', function() {

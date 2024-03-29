@@ -86,9 +86,9 @@
             'MMM YYYY'));
 
         // Fonction pour effectuer l'appel AJAX
-        function performAjaxCall(startDate, endDate) {
+        function performAjaxCall(id, startDate, endDate) {
             $.ajax({
-                url: 'http://localhost:8000/fiche',
+                url: 'http://localhost:8000/fiche/' + id, // Include the id in the URL
                 type: 'GET', // ou 'POST'
                 data: {
                     startYear: startDate.format('YYYY'),
@@ -102,7 +102,8 @@
                 success: function(response) {
                     console.log('Performance data:', response);
                     updateCharts(
-                    response); // Vous devez définir cette fonction pour mettre à jour les graphiques avec les données reçues
+                        response
+                        ); // Vous devez définir cette fonction pour mettre à jour les graphiques avec les données reçues
                     // Update the startDate and endDate in the view
                     $('#startDateDisplay').text(response.startDate);
                     $('#endDateDisplay').text(response.endDate);
@@ -112,19 +113,30 @@
                 }
             });
         }
+        // Assuming the URL structure is like http://localhost:8000/fiche/123
+      var pathSegments = window.location.pathname.split('/');
+        var id = pathSegments[2]; // This will give you the ID part of the URL
+
 
         // Appeler l'AJAX lors de l'initialisation de la page
-        performAjaxCall(initialStartDate, initialEndDate);
+        performAjaxCall(id, initialStartDate, initialEndDate);
 
-        // Événement de changement de la plage de dates sélectionnée
-        $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
-            var startDate = picker.startDate;
-            var endDate = picker.endDate;
-            console.log('Plage de dates sélectionnée :', startDate.format('D MMM YYYY'), '-', endDate
-                .format('D MMM YYYY'));
+        // Vérifier si l'identifiant est défini et différent de null
+        if (id !== null) {
+            // Événement de changement de la plage de dates sélectionnée
+            $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+                var startDate = picker.startDate;
+                var endDate = picker.endDate;
 
-            performAjaxCall(startDate, endDate);
-        });
+                console.log('Plage de dates sélectionnée :', startDate.format('D MMM YYYY'), '-',
+                    endDate.format('D MMM YYYY'));
+
+                // Effectuer l'appel AJAX avec l'identifiant et les dates sélectionnées
+                performAjaxCall(id, startDate, endDate);
+            });
+        } else {
+            console.log('Identifiant du lieu non trouvé dans l\'URL.');
+        }
     });
 </script>
 

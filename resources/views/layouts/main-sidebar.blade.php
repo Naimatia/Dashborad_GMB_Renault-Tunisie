@@ -41,9 +41,9 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="{{ route('locations') }}" class="nav-link">
+          <a href="{{ route('Établissements') }}" class="nav-link">
             <i class="nav-icon fas fa-home"></i>
-            <p>Locations</p>
+            <p>Établissements</p>
           </a>
         </li>
 

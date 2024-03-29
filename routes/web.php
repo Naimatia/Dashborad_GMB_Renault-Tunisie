@@ -26,6 +26,6 @@ Route::get('/callGoogleApi', [GoogleAuthController::class, 'callGoogleApi']);
 
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
-Route::get('/locations', [GoogleAuthController::class, 'callGoogleApi'])->name('locations');
-// Route::get('/fiche/{id?}',  [GoogleAuthController::class, 'PerfermanceAPI'])->name('fiche');
-Route::get('/fiche',  [GoogleAuthController::class, 'PerfermanceAPI'])->name('fiche');
+Route::get('/Établissements', [GoogleAuthController::class, 'callGoogleApi'])->name('Établissements');
+ Route::get('/fiche/{id}',  [GoogleAuthController::class, 'PerfermanceAPI'])->name('fiche');
+// Route::get('/fiche',  [GoogleAuthController::class, 'PerfermanceAPI'])->name('fiche');
