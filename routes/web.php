@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OpenAIController;
 use App\Http\Controllers\GoogleAuthController;
 
 /*
@@ -26,6 +27,13 @@ Route::get('/callGoogleApi', [GoogleAuthController::class, 'callGoogleApi']);
 
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
-Route::get('/Établissements', [GoogleAuthController::class, 'callGoogleApi'])->name('Établissements');
- Route::get('/fiche/{id}',  [GoogleAuthController::class, 'PerfermanceAPI'])->name('fiche');
-// Route::get('/fiche',  [GoogleAuthController::class, 'PerfermanceAPI'])->name('fiche');
+Route::get('/Établissements', [GoogleAuthController::class, 'ListeEtablissement'])->name('Établissements');
+//Route::get('/fiche/{id}',  [GoogleAuthController::class, 'PerfermanceAPI'])->name('fiche.performance');
+Route::get('/fiche/{id}',  [GoogleAuthController::class, 'GetPerfermanceReviews'])->name('fiche');
+
+
+Route::get('/ask', function () {
+    return view('ask_question');
+});
+
+Route::post('/ask', [OpenAIController::class, 'askQuestion'])->name('ask.question');

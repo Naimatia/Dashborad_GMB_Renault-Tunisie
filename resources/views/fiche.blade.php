@@ -6,11 +6,45 @@
 @stop
 
 @section('css')
+    <!-- Include Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap4.min.css">
+    <style>
+        /* Style pour activer visuellement le lien */
+        .active-link {
+            font-weight: bold;
+            /* Par exemple, utilisez une police en gras */
+            color: blue !important;
+            /* Couleur du texte lorsque le lien est actif */
+        }
+
+        .star-icon {
+            font-size: 20px;
+            /* Changer la taille des étoiles */
+            color: gold;
+            /* Changer la couleur des étoiles */
+        }
+
+        .response-row td {
+            width: 100% !important;
+        }
+    </style>
+@endsection
+
+@section('link1')
+    <a href="javascript:void(0);" id="link1" class="nav-link active-link"
+        onclick="toggleSection('section1', 'link1')">Perfermance</a>
+@endsection
+
+@section('link2')
+    <a href="javascript:void(0);" id="link2" class="nav-link" onclick="toggleSection('section2', 'link2')">Reviews</a>
 @endsection
 
 @section('title_head')
     @if (request()->has('title'))
-        BIENVENUE {{ request()->get('title') }}
+        {{ request()->get('title') }}
     @endif
 @endsection
 
@@ -20,291 +54,538 @@
 @endsection
 
 @section('title_page2')
-    Perfermances
+    Statistiques
 @endsection
 
 @section('content')
-    <div class="container-fluid">
 
-        <!-- Info boxes -->
-        <div class="row">
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box">
-                    <span class="info-box-icon bg-info elevation-1"><i class="fas fa-eye"></i></span>
+    <div id="section1">
+        @if (isset($currentYearPerformanceData) && isset($lastYearPerformanceData))
+            <div class="container-fluid">
+                <!-- Info boxes -->
+                <div class="row">
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-eye"></i></span>
 
-                    <div class="info-box-content">
-                        <span class="info-box-text">Consultations</span>
-                        <span class="info-box-number">
-                            <span id="currentYearTotal"></span>
-                            <span class="description-percentage" id="growthRateDisplay" style="font-weight: normal;"></span>
-                        </span>
-                    </div>
-                    <!-- /.info-box-content -->
-                </div>
-                <!-- /.info-box -->
-            </div>
-
-            <!-- /.col -->
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-info-circle"></i>
-
-                    </span>
-
-                    <div class="info-box-content">
-                        <span class="info-box-text">Interactions</span>
-                        <span class="info-box-number">
-                            <span id="currentYearTotalInteraction"></span>
-                            <span class="description-percentage" id="growthRateInteraction"
-                                style="font-weight: normal;"></span>
-                        </span>
-                    </div>
-                    <!-- /.info-box-content -->
-                </div>
-                <!-- /.info-box -->
-            </div>
-            <!-- /.col -->
-
-            <!-- fix for small devices only -->
-            <div class="clearfix hidden-md-up"></div>
-
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-external-link-alt"></i></span>
-
-                    <div class="info-box-content">
-                        <span class="info-box-text">Clic Vers Site Web</span>
-                        <span class="info-box-number">
-                            <span id="TotalWebInteraction"></span>
-                            <span class="description-percentage" id="growthRateWeb" style="font-weight: normal;"></span>
-                        </span>
-                    </div>
-                    <!-- /.info-box-content -->
-                </div>
-                <!-- /.info-box -->
-            </div>
-            <!-- /.col -->
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box mb-3">
-                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-book"></i></span>
-
-                    <div class="info-box-content">
-                        <span class="info-box-text">Réservation</span>
-                        <span class="info-box-number">
-                            <span id="TotalConversationInteraction"></span>
-                            <span class="description-percentage" id="growthRateReservation"
-                                style="font-weight: normal;"></span>
-                        </span>
-                    </div>
-                    <!-- /.info-box-content -->
-                </div>
-                <!-- /.info-box -->
-            </div>
-            <!-- /.col -->
-        </div>
-        <!-- /.row -->
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Interactions avec la fiche de l'établissement
-                        </h5>
-
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- /.card-header -->
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <p class="text-center">
-                                    <strong>Période: <span id="startDateDisplay"></span> - <span
-                                            id="endDateDisplay"></span></strong>
-                                </p>
-
-                                <div class="chart">
-                                    <!-- Sales Chart Canvas -->
-                                    <canvas id="InteractionChart" height="250" style="height: 250px;"></canvas>
-                                </div>
-                                <!-- /.chart-responsive -->
+                            <div class="info-box-content">
+                                <span class="info-box-text">Consultations</span>
+                                <span class="info-box-number">
+                                    <span id="currentYearTotal"></span>
+                                    <span class="description-percentage" id="growthRateDisplay"
+                                        style="font-weight: normal;"></span>
+                                </span>
                             </div>
-                            <!-- /.col -->
-                            <div class="col-md-4">
-                                <p class="text-center">
-                                    <strong>Statistiques des Interactions</strong>
-                                </p>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
 
-                                <div class="progress-group">
-                                    Clics vers le site Web effectués
-                                    <span class="float-right"><b id="websiteClicksCount"></b>/<span
-                                            id="cartTotalInteraction1"></span></span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-primary" id="websiteClicksProgressBar"
-                                            style="width: 0%"></div>
-                                    </div>
+                    <!-- /.col -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3">
+                            <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-info-circle"></i>
+
+                            </span>
+
+                            <div class="info-box-content">
+                                <span class="info-box-text">Interactions</span>
+                                <span class="info-box-number">
+                                    <span id="currentYearTotalInteraction"></span>
+                                    <span class="description-percentage" id="growthRateInteraction"
+                                        style="font-weight: normal;"></span>
+                                </span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+
+                    <!-- fix for small devices only -->
+                    <div class="clearfix hidden-md-up"></div>
+
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3">
+                            <span class="info-box-icon bg-success elevation-1"><i
+                                    class="fas fa-external-link-alt"></i></span>
+
+                            <div class="info-box-content">
+                                <span class="info-box-text">Clic Vers Site Web</span>
+                                <span class="info-box-number">
+                                    <span id="TotalWebInteraction"></span>
+                                    <span class="description-percentage" id="growthRateWeb"
+                                        style="font-weight: normal;"></span>
+                                </span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3">
+                            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-book"></i></span>
+
+                            <div class="info-box-content">
+                                <span class="info-box-text">Réservation</span>
+                                <span class="info-box-number">
+                                    <span id="TotalConversationInteraction"></span>
+                                    <span class="description-percentage" id="growthRateReservation"
+                                        style="font-weight: normal;"></span>
+                                </span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Interactions avec la fiche de l'établissement
+                                </h5>
+
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
                                 </div>
-                                <!-- /.progress-group -->
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p class="text-center">
+                                            <strong>Période: <span id="startDateDisplay"></span> - <span
+                                                    id="endDateDisplay"></span></strong>
+                                        </p>
 
-                                <div class="progress-group">
-                                    Appels effectués
-                                    <span class="float-right"><b id="callsCount"></b>/<span
-                                            id="cartTotalInteraction2"></span></span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-danger" id="callsProgressBar" style="width: 0%"
-                                            title=""></div>
+                                        <div class="chart">
+                                            <!-- Sales Chart Canvas -->
+                                            <canvas id="InteractionChart" height="250" style="height: 250px;"></canvas>
+                                        </div>
+                                        <!-- /.chart-responsive -->
                                     </div>
-                                </div>
+                                    <!-- /.col -->
+                                    <div class="col-md-4">
+                                        <p class="text-center">
+                                            <strong>Statistiques des Interactions</strong>
+                                        </p>
 
-                                <!-- /.progress-group -->
-                                <div class="progress-group">
-                                    Demandes d'itinéraire effectuées
-                                    <span class="float-right"><b id="itineraireCount"></b>/
-                                        <span id="cartTotalInteraction3"></span></span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-warning" id="itineraireProgressBar" style="width: 0%"
-                                            title="">
+                                        <div class="progress-group">
+                                            Clics vers le site Web effectués
+                                            <span class="float-right"><b id="websiteClicksCount"></b>/<span
+                                                    id="cartTotalInteraction1"></span></span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar bg-primary" id="websiteClicksProgressBar"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                        <!-- /.progress-group -->
+
+                                        <div class="progress-group">
+                                            Appels effectués
+                                            <span class="float-right"><b id="callsCount"></b>/<span
+                                                    id="cartTotalInteraction2"></span></span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar bg-danger" id="callsProgressBar"
+                                                    style="width: 0%" title=""></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- /.progress-group -->
+                                        <div class="progress-group">
+                                            Demandes d'itinéraire effectuées
+                                            <span class="float-right"><b id="itineraireCount"></b>/
+                                                <span id="cartTotalInteraction3"></span></span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar bg-warning" id="itineraireProgressBar"
+                                                    style="width: 0%" title="">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- /.progress-group -->
+                                        <div class="progress-group">
+                                            Réservations effectuées
+                                            <span class="float-right"><b id="reservationsCount"></b>/
+                                                <span id="cartTotalInteraction4"></span></span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar bg-success" id="reservationsProgressBar"
+                                                    style="width: 0%">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /.progress-group -->
+
+                                        <div class="progress-group">
+                                            Messages envoyés
+                                            <span class="float-right"><b id="messagesCount"></b>/
+                                                <span id="cartTotalInteraction5"></span></span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar bg-danger" id="messagesProgressBar"
+                                                    style="width: 0%">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                    <!-- /.col -->
 
-                                <!-- /.progress-group -->
-                                <div class="progress-group">
-                                    Réservations effectuées
-                                    <span class="float-right"><b id="reservationsCount"></b>/
-                                        <span id="cartTotalInteraction4"></span></span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-success" id="reservationsProgressBar"
-                                            style="width: 0%">
+                                    <!-- /.col -->
+                                </div>
+                                <!-- /.row -->
+                            </div>
+                            <!-- ./card-body -->
+                            <div class="card-footer">
+                                <div class="row justify-content-center text-center">
+                                    <div class="col-sm-2 col-6">
+                                        <div class="description-block border-right">
+                                            <span class="description-percentage" data-interaction="WEBSITE_CLICKS"></span>
+                                            <h5 class="description-header"></h5>
+                                            <span class="description-text">Clic Web Total</span>
                                         </div>
+                                        <!-- /.description-block -->
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="col-sm-2 col-6">
+                                        <div class="description-block border-right">
+                                            <span class="description-percentage" data-interaction="CALL_CLICKS"></span>
+                                            <h5 class="description-header"></h5>
+                                            <span class="description-text">Appel Total</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                    </div>
+                                    <div class="col-sm-2 col-6">
+                                        <div class="description-block border-right">
+                                            <span class="description-percentage"
+                                                data-interaction="BUSINESS_DIRECTION_REQUESTS"></span>
+                                            <h5 class="description-header"></h5>
+                                            <span class="description-text">Itinéraire Total</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="col-sm-2 col-6">
+                                        <div class="description-block border-right">
+                                            <span class="description-percentage"
+                                                data-interaction="BUSINESS_BOOKINGS"></span>
+                                            <h5 class="description-header"></h5>
+                                            <span class="description-text">Réservation Total</span>
+                                        </div>
+                                        <!-- /.description-block -->
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="col-sm-2 col-6">
+                                        <div class="description-block">
+                                            <span class="description-percentage"
+                                                data-interaction="BUSINESS_CONVERSATIONS"></span>
+                                            <h5 class="description-header"></h5>
+                                            <span class="description-text">Message Total</span>
+                                        </div>
+                                        <!-- /.description-block -->
                                     </div>
                                 </div>
-                                <!-- /.progress-group -->
-
-                                <div class="progress-group">
-                                    Messages envoyés
-                                    <span class="float-right"><b id="messagesCount"></b>/
-                                        <span id="cartTotalInteraction5"></span></span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-danger" id="messagesProgressBar" style="width: 0%">
-                                        </div>
-                                    </div>
-                                </div>
+                                <!-- /.row -->
                             </div>
-                            <!-- /.col -->
 
-                            <!-- /.col -->
+                            <!-- /.card-footer -->
                         </div>
-                        <!-- /.row -->
+                        <!-- /.card -->
                     </div>
-                    <!-- ./card-body -->
-                    <div class="card-footer">
-                        <div class="row justify-content-center text-center">
-                            <div class="col-sm-2 col-6">
-                                <div class="description-block border-right">
-                                    <span class="description-percentage" data-interaction="WEBSITE_CLICKS"></span>
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Clic Web Total</span>
-                                </div>
-                                <!-- /.description-block -->
-                            </div>
-                            <!-- /.col -->
-                            <div class="col-sm-2 col-6">
-                                <div class="description-block border-right">
-                                    <span class="description-percentage" data-interaction="CALL_CLICKS"></span>
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Appel Total</span>
-                                </div>
-                                <!-- /.description-block -->
-                            </div>
-                            <div class="col-sm-2 col-6">
-                                <div class="description-block border-right">
-                                    <span class="description-percentage"
-                                        data-interaction="BUSINESS_DIRECTION_REQUESTS"></span>
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Itinéraire Total</span>
-                                </div>
-                                <!-- /.description-block -->
-                            </div>
-                            <!-- /.col -->
-                            <div class="col-sm-2 col-6">
-                                <div class="description-block border-right">
-                                    <span class="description-percentage" data-interaction="BUSINESS_BOOKINGS"></span>
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Réservation Total</span>
-                                </div>
-                                <!-- /.description-block -->
-                            </div>
-                            <!-- /.col -->
-                            <div class="col-sm-2 col-6">
-                                <div class="description-block">
-                                    <span class="description-percentage" data-interaction="BUSINESS_CONVERSATIONS"></span>
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Message Total</span>
-                                </div>
-                                <!-- /.description-block -->
-                            </div>
-                        </div>
-                        <!-- /.row -->
-                    </div>
-
-                    <!-- /.card-footer -->
+                    <!-- /.col -->
                 </div>
-                <!-- /.card -->
+                <!-- /.row -->
+                <!-- Main row -->
+                <div class="row">
+
+                    <!-- Left col -->
+                    <section class="col-lg-7 connectedSortable">
+                        <!-- Custom tabs (Charts with tabs)-->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-chart-pie mr-1"></i>
+                                    Répartition des plates-formes et appareils
+                                </h3>
+                                <div class="card-tools">
+                                    <ul class="nav nav-pills ml-auto">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Bàtons</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#sales-chart" data-toggle="tab">Circulaire</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div><!-- /.card-header -->
+                            <div class="card-body">
+                                <div class="tab-content p-0">
+                                    <!-- Morris chart - Sales -->
+                                    <div class="chart tab-pane active" id="revenue-chart"
+                                        style="position: relative; height: 300px;">
+                                        <canvas id="impressionsChart" height="300" style="height: 300px;"></canvas>
+                                    </div>
+                                    <div class="chart tab-pane" id="sales-chart"
+                                        style="position: relative; height: 300px;">
+                                        <canvas id="impressionsSales" height="300" style="height: 300px;"></canvas>
+                                    </div>
+                                </div>
+                            </div><!-- /.card-body -->
+                        </div>
+                    </section>
+                </div>
+
+
+
+
             </div>
-            <!-- /.col -->
-        </div>
-        <!-- /.row -->
-        <!-- Main row -->
-        <div class="row">
-
-            <!-- Left col -->
-            <section class="col-lg-7 connectedSortable">
-                <!-- Custom tabs (Charts with tabs)-->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-chart-pie mr-1"></i>
-                            Répartition des plates-formes et appareils
-                        </h3>
-                        <div class="card-tools">
-                            <ul class="nav nav-pills ml-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Bàtons</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#sales-chart" data-toggle="tab">Circulaire</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div><!-- /.card-header -->
-                    <div class="card-body">
-                        <div class="tab-content p-0">
-                            <!-- Morris chart - Sales -->
-                            <div class="chart tab-pane active" id="revenue-chart"
-                                style="position: relative; height: 300px;">
-                                <canvas id="impressionsChart" height="300" style="height: 300px;"></canvas>
-                            </div>
-                            <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;">
-                                <canvas id="impressionsSales" height="300" style="height: 300px;"></canvas>
-                            </div>
-                        </div>
-                    </div><!-- /.card-body -->
-                </div>
-            </section>
-        </div>
-
-
-
+        @endif
 
     </div>
+
+    <div id="section2" style="display: none;">
+        <div class="container-fluid">
+
+            @if (!empty($allReviews))
+
+
+                <div class="row">
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box">
+                            <div class="info-box-content text-center">
+                                <span class="info-box-text">Evaluation</span>
+                                <span class="info-box-number">
+                                    <span class="info-box-decimal">{{ round($averageRating, 1) }} / 5</span>
+                                    @for ($i = 0; $i < 5; $i++)
+                                        @if ($i < floor($averageRating))
+                                            <i class="fas fa-star" style="color: gold;"></i>
+                                        @elseif ($i - $averageRating < 0.5)
+                                            <i class="fas fa-star-half-alt" style="color: gold;"></i>
+                                        @else
+                                            <i class="far fa-star" style="color: gold;"></i>
+                                        @endif
+                                    @endfor
+                                </span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+
+                    <!-- /.col -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3">
+                            <div class="info-box-content text-center">
+                                <span class="info-box-text">No. de commentaires</span>
+                                <span class="info-box-number">
+                                    {{ $totalReviewCount }}
+                                </span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3">
+
+                            <div class="info-box-content text-center">
+                                <span class="info-box-text">Pourcentage de réponse</span>
+                                <span class="info-box-number">
+                                    @php
+                                        // Nombre total d'avis
+$totalReviewsCount = count($allReviews);
+
+// Nombre d'avis avec réponse
+                                        $reviewsWithReplyCount = 0;
+                                        foreach ($allReviews as $review) {
+                                            if (
+                                                isset($review['reviewReply']) &&
+                                                isset($review['reviewReply']['comment'])
+                                            ) {
+                                                $reviewsWithReplyCount++;
+                                            }
+                                        }
+
+                                        // Calcul du pourcentage de réponse
+                                        $responsePercentage =
+                                            $totalReviewsCount > 0
+                                                ? ($reviewsWithReplyCount / $totalReviewsCount) * 100
+                                                : 0;
+
+                                        // Affichage du pourcentage de réponse
+                                        echo round($responsePercentage, 2) . '%';
+                                    @endphp
+                                </span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3">
+
+                            <div class="info-box-content text-center">
+                                <span class="info-box-text">Temps moyen de réponse</span>
+                                <span class="info-box-number">
+                                    @php
+                                        $totalResponseTime = 0;
+                                        $totalReviewsWithReply = 0;
+
+                                        foreach ($allReviews as $review) {
+                                            if (
+                                                isset($review['reviewReply']) &&
+                                                isset($review['createTime']) &&
+                                                isset($review['reviewReply']['updateTime'])
+                                            ) {
+                                                $commentUpdateTime = strtotime($review['createTime']);
+                                                $replyUpdateTime = strtotime($review['reviewReply']['updateTime']);
+                                                $responseTime = $replyUpdateTime - $commentUpdateTime;
+                                                $totalResponseTime += $responseTime;
+                                                $totalReviewsWithReply++;
+                                            }
+                                        }
+
+                                        // Calcul du temps moyen de réponse en secondes
+                                        $averageResponseTimeInSeconds =
+                                            $totalReviewsWithReply > 0
+                                                ? $totalResponseTime / $totalReviewsWithReply
+                                                : 0;
+
+                                        // Convertir le temps moyen de réponse en heures, minutes et secondes
+                                        $hours = floor($averageResponseTimeInSeconds / 3600);
+                                        $minutes = floor(($averageResponseTimeInSeconds % 3600) / 60);
+                                        $seconds = $averageResponseTimeInSeconds % 60;
+
+                                        // Affichage du temps moyen de réponse
+                                        echo $hours . ' H' . ' ' . $minutes . ' M';
+
+                                    @endphp
+                                </span>
+
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- /.row -->
+
+                <table id="reviewsTable" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Evaluation</th>
+                            <th>Date</th>
+                            <th>Réviseur</th>
+                            <th>Commentaire</th>
+                            <th>Répondre</th>
+                            <th>Temps de réponse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($allReviews as $review)
+                            <tr class="review-row" data-review-id="{{ $review['reviewId'] }}">
+                                <td>
+                                    @php
+                                        $starRating = $review['starRating'];
+                                        $starIcons = '';
+
+                                        switch ($starRating) {
+                                            case 'ONE':
+                                                $starIcons = '★☆☆☆☆';
+                                                break;
+                                            case 'TWO':
+                                                $starIcons = '★★☆☆☆';
+                                                break;
+                                            case 'THREE':
+                                                $starIcons = '★★★☆☆';
+                                                break;
+                                            case 'FOUR':
+                                                $starIcons = '★★★★☆';
+                                                break;
+                                            case 'FIVE':
+                                                $starIcons = '★★★★★';
+                                                break;
+                                            default:
+                                                $starIcons = 'No rating';
+                                        }
+                                    @endphp
+                                    <span class="star-icon">{{ $starIcons }}</span>
+                                </td>
+                                <td>
+                                    @php
+                                        $dateTime = new DateTime($review['createTime']);
+                                        $formattedDateTime = $dateTime->format('Y-m-d H:i:s'); // Format de date et heure
+                                    @endphp
+                                    {{ $formattedDateTime }}
+                                </td>
+                                <td>
+                                    <img src="{{ $review['reviewer']['profilePhotoUrl'] }}"
+                                        alt="{{ $review['reviewer']['displayName'] }} profile photo" class="reviewer-icon"
+                                        width="50" height="50">
+                                    {{ $review['reviewer']['displayName'] }}
+                                </td>
+                                <td>
+                                    @if (isset($review['comment']))
+                                        {!! nl2br(explode('(Translated by Google)', $review['comment'])[0] ?? $review['comment']) !!}
+                                    @else
+                                        Pas de commentaire disponible
+                                    @endif
+                                </td>
+                                <td>
+                                    @if (isset($review['reviewReply']) && isset($review['reviewReply']['comment']))
+                                        {!! nl2br(
+                                            explode('(Translated by Google)', $review['reviewReply']['comment'])[0] ?? $review['reviewReply']['comment'],
+                                        ) !!}
+                                    @else
+                                        Pas de réponse disponible
+                                    @endif
+                                </td>
+
+
+
+
+
+                                <td>
+                                    @if (isset($review['reviewReply']) && isset($review['reviewReply']['updateTime']))
+                                        @php
+                                            $commentUpdateTime = strtotime($review['createTime']);
+                                            $replyUpdateTime = strtotime($review['reviewReply']['updateTime']);
+                                            $responseTime = $replyUpdateTime - $commentUpdateTime;
+                                            $responseHours = floor($responseTime / 3600);
+                                            $responseMinutes = floor(($responseTime % 3600) / 60);
+                                            echo $responseHours . ' heures et ' . $responseMinutes . ' minutes';
+                                        @endphp
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <p>Aucun avis disponible pour le moment.</p>
+            @endif
+        </div>
     </div>
+
+
+
+
+
+
 @endsection
 
 @section('scripts')
@@ -573,7 +854,7 @@
                 growthRateInteractionDisplay.textContent = Math.abs(interactionGrowthRate).toFixed(1);
                 growthRateInteractionDisplay.classList.add('text-danger'); // Add class to display in red
                 growthRateInteractionDisplay.innerHTML += '% <i class="fas fa-caret-down"></i>';
-            } else if (interactionGrowthRate > 0)  {
+            } else if (interactionGrowthRate > 0) {
                 growthRateInteractionDisplay.textContent = interactionGrowthRate.toFixed(1);
                 growthRateInteractionDisplay.classList.remove('text-danger');
                 growthRateInteractionDisplay.classList.add('text-success'); // Remove class to display in green
@@ -931,4 +1212,161 @@
             updateCharts(rawData);
         });
     </script>
+
+    <script>
+        // Fonction pour basculer entre les sections et activer le lien correspondant
+        function toggleSection(sectionId, linkId) {
+            // Masquer toutes les sections
+            var sections = document.querySelectorAll('[id^="section"]');
+            sections.forEach(function(section) {
+                section.style.display = 'none';
+            });
+
+            // Afficher la section spécifiée
+            document.getElementById(sectionId).style.display = 'block';
+
+            // Supprimer la classe active-link de tous les liens
+            var links = document.querySelectorAll('.nav-link');
+            links.forEach(function(link) {
+                link.classList.remove('active-link');
+            });
+
+            // Ajouter la classe active-link au lien cliqué
+            document.getElementById(linkId).classList.add('active-link');
+        }
+    </script>
+
+
+    <!-- Include Bootstrap 4 JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            var table = $('#reviewsTable').DataTable({
+                "responsive": true,
+                "lengthChange": false,
+                "autoWidth": false,
+                "order": [
+                    [1, "desc"]
+                ], // Sort by the second column (index 1) in descending order
+                "initComplete": function(settings, json) {
+                    // Add event listener for showing child rows
+                    $('#reviewsTable tbody').on('click', 'tr.review-row', function() {
+                        var tr = $(this);
+                        var row = table.row(tr);
+
+                        // Check if the response is available
+                        var responseAvailable = tr.find('td:nth-child(5)').text().trim() ==
+                            'Pas de réponse disponible';
+
+                        if (row.child.isShown()) {
+                            // This row is already open - close it
+                            row.child.hide();
+                            tr.removeClass('shown');
+                        } else if (responseAvailable) {
+                            // Close other response rows
+                            $('#reviewsTable tbody tr.response-row').hide();
+                            $('.review-row.shown').removeClass('shown');
+                            // Open this row
+                            row.child(format(tr.data('review-id')), 'response-row').show();
+                            tr.addClass('shown');
+                        }
+                    });
+                }
+            });
+
+            function format(reviewId) {
+                // Example of generating the form dynamically
+                var formHtml =
+                    '<form class="response-form" data-review-id="' + reviewId + '">' +
+                    '<div class="form-group">' +
+                    '<label for="response">Votre réponse :</label>' +
+                    '<textarea class="form-control" name="response" rows="3" maxlength="4000" required></textarea>' +
+                    '<small class="text-muted"><span id="char-count">0</span>/4000 </small>' +
+                    '</div>' +
+                    '<div class="form-group btn-group">' +
+                    '<button type="submit" class="btn btn-primary">Répondre</button>' +
+                    '<button type="button" class="btn btn-secondary cancel-response">Annuler</button>' +
+                    '</div>' +
+                    '</form>';
+                return formHtml;
+            }
+
+            // Event handler for character count update
+            $('#reviewsTable').on('input', '.response-form textarea', function() {
+                var charCount = $(this).val().length;
+                $(this).closest('.response-form').find("#char-count").text(charCount);
+            });
+
+            // Event handler for cancel response button
+            $('#reviewsTable').on('click', '.cancel-response', function() {
+                $(this).closest(".response-row").hide();
+            });
+
+            $('#reviewsTable tbody').on('click', 'tr.review-row', function() {
+                var tr = $(this);
+                var reviewId = tr.data('review-id'); // Directly retrieve the data attribute
+
+                if (typeof reviewId !== 'undefined') {
+                    // Proceed with your logic, e.g., AJAX request
+                    console.log('Review ID when click:', reviewId);
+                    // Assuming you have a form element in your format function
+                    var formHtml = format(reviewId);
+                    // Store the reviewId in the form's data attribute
+                    $(formHtml).data('review-id', reviewId);
+                } else {
+                    console.error('Review ID is undefined');
+                }
+            });
+
+            // Event handler for response form submission
+            $('#reviewsTable').on('submit', '.response-form', function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                // Use the reviewId variable obtained from the click event handler
+                var reviewId = $(this).data('review-id');
+
+                var responseText = $(this).find('textarea[name="response"]').val();
+
+                // Assuming you have the locationId and accessToken available
+                var locationId = '{{ $id }}'; // Retrieve locationId from the controller
+                var accessToken = '{{ $token }}'; // Retrieve accessToken from the controller
+
+                // Prepare the request data
+                var requestData = {
+                    "comment": responseText // Use the responseText as the comment for the reply
+                };
+
+                // Send a PUT request to the GMB API
+                $.ajax({
+                    url: 'https://mybusiness.googleapis.com/v4/accounts/110996943980669817062/locations/' +
+                        locationId + '/reviews/' + reviewId + '/reply',
+                    type: 'PUT', // Corrected to uppercase 'PUT'
+                    headers: {
+                        'Authorization': 'Bearer ' + accessToken,
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify(requestData), // Correctly stringify the requestData
+                    success: function(response) {
+                        console.log('Response posted successfully:', response);
+                        // Optionally hide the response form and display a success message
+                        $(this).closest('.response-row').hide();
+                    }.bind(this), // Ensure 'this' refers to the form
+                    error: function(xhr, status, error) {
+                        console.error('Error posting the response:', error);
+                        // Optionally display an error message or perform other actions
+                    }
+                });
+            });
+        });
+    </script>
+
+
+
 @endsection
