@@ -84,7 +84,6 @@
         // Set the initial value of the input to "Ce mois"
         $('#dateRangePicker').val(initialStartDate.format('MMM YYYY') + ' - ' + initialEndDate.format(
             'MMM YYYY'));
-
         // Fonction pour effectuer l'appel AJAX
         function performAjaxCall(id, startDate, endDate) {
             $.ajax({
@@ -103,7 +102,7 @@
                     console.log('Performance data:', response);
                     updateCharts(
                         response
-                        ); // Vous devez définir cette fonction pour mettre à jour les graphiques avec les données reçues
+                    ); // Vous devez définir cette fonction pour mettre à jour les graphiques avec les données reçues
                     // Update the startDate and endDate in the view
                     $('#startDateDisplay').text(response.startDate);
                     $('#endDateDisplay').text(response.endDate);
@@ -114,10 +113,8 @@
             });
         }
         // Assuming the URL structure is like http://localhost:8000/fiche/123
-      var pathSegments = window.location.pathname.split('/');
+        var pathSegments = window.location.pathname.split('/');
         var id = pathSegments[2]; // This will give you the ID part of the URL
-
-
         // Appeler l'AJAX lors de l'initialisation de la page
         performAjaxCall(id, initialStartDate, initialEndDate);
 
@@ -137,6 +134,59 @@
         } else {
             console.log('Identifiant du lieu non trouvé dans l\'URL.');
         }
+
+
+        // localisation URL
+        // Function to perform AJAX call
+        function LocationAjaxCall(startDate, endDate) {
+            $.ajax({
+                url: `http://localhost:8000/`, // URL of the ListeLocalisation function
+                type: 'GET',
+                data: {
+                    startYear: startDate.format('YYYY'),
+                    startMonth: startDate.format('M'),
+                    startDay: startDate.format('D'),
+                    endYear: endDate.format('YYYY'),
+                    endMonth: endDate.format('M'),
+                    endDay: endDate.format('D'),
+                    // Include any other necessary data here
+                },
+                success: function(response) {
+                    console.log('Data received:', response);
+
+                    // Calculer les sommes totales d'interactions et d'impressions
+                    const {
+                        totalSum,
+                        graphInteractionData
+                    } = calculateSumOfValues(response);
+
+                    const {
+                        totalImpressionsSum,
+                        graphConseltationData
+                    } = calculateImpressionsSum(response)
+                    // Update the startDate and endDate in the view
+                    $('#totalInteractionSum').text(totalSum);
+                    $('#totalImpressionsSum').text(totalImpressionsSum);
+
+                    // Afficher le graphique des ventes
+                    displaySalesGraph(graphInteractionData);
+                    displayConseltationGraph(graphConseltationData)
+                },
+                error: function(error) {
+                    console.log('Error fetching data:', error);
+                }
+            });
+        }
+
+        // Initial call with default date range
+        LocationAjaxCall(initialStartDate, initialEndDate);
+
+        // Add event listener for date range picker
+        $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+            var startDate = picker.startDate;
+            var endDate = picker.endDate;
+            LocationAjaxCall(startDate, endDate);
+        });
     });
 </script>
 

@@ -19,9 +19,11 @@
     </style>
   @endsection
 
-@section('title_head')
-    {{ count($locations['locations']) }} Établissement
+  @section('title_head')
+  {{ count($locations) }} Établissement
 @endsection
+
+
 
 @section('title_page1')
     Accueil
@@ -33,7 +35,7 @@
 
 @section('content')
 
-    @if (!empty($locations['locations']))
+@if (!empty($locations))
 
         <!-- Main content -->
         <section class="content">
@@ -43,40 +45,44 @@
                         <div class="card">
                             <!-- /.card-header -->
                             <div class="card-body">
-                                <table id="locationsTable" class="table table-bordered table-hover">
+                                <table id="locationsTable" class="table table-bordered table-hover" style="cursor: grab">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Nom de l'établissement</th>
                                             <th>Ville</th>
                                             <th>Addresse</th>
-                                            <th>RegionCode</th>
-                                            <th>Code Postal</th>
+                                            <th>Télephone</th>
+                                            <th>État</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($locations['locations'] as $location)
-                                            <tr data-id="{{ explode('/', $location['name'])[1] }}"
+                                        @foreach ($locations as $location)
+                                        <tr data-id="{{ explode('/', $location['name'])[1] }}"
                                                 data-title="{{ $location['title'] }}">
-                                                <td>{{ $location['title'] ?? 'No Title' }}</td>
-                                                <td>{{ $location['storefrontAddress']['locality'] ?? 'No Locality' }}</td>
-                                                <td>{{ $location['storefrontAddress']['addressLines'][0] ?? 'No Address' }}
+                                                <td>{{ $location['title'] ?? 'Aucune Titre' }}</td>
+                                                <td>{{ $location['storefrontAddress']['locality'] ?? 'Aucune Localité' }}</td>
+                                                <td>
+                                                    @if (isset($location['storefrontAddress']['addressLines']) && is_array($location['storefrontAddress']['addressLines']))
+                                                        @foreach ($location['storefrontAddress']['addressLines'] as $addressLine)
+                                                            {{ htmlspecialchars($addressLine) }}
+                                                        @endforeach
+                                                    @else
+                                                        Aucune adresse
+                                                    @endif
                                                 </td>
-                                                <td>{{ $location['storefrontAddress']['regionCode'] ?? 'No Region Code' }}
+                                                                                                </td>
+                                                <td>{{ $location['phoneNumbers']['primaryPhone'] ?? 'Aucune Phone Number' }}
                                                 </td>
-                                                <td>{{ $location['storefrontAddress']['postalCode'] ?? 'No Postal Code' }}
+                                                <td>
+                                                    @if ($location['verified'])
+                                                        <span class="badge badge-success">Valide</span>
+                                                    @else
+                                                        <span class="badge badge-warning">Validation requise</span>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th>Nom de l'établissement</th>
-                                            <th>Ville</th>
-                                            <th>Addresse</th>
-                                            <th>RegionCode</th>
-                                            <th>Code Postal</th>
-                                        </tr>
-                                    </tfoot>
                                 </table>
                             </div>
                             <!-- /.card-body -->

@@ -15,9 +15,16 @@ use App\Http\Controllers\GoogleAuthController;
 |
 */
 
+/*
 Route::get('/', function () {
-    return view('dashbord');
+ return view('dashbord');
 });
+*/
+Route::get('/Login', function () {
+    return view('test');
+   });
+Route::get('/', [GoogleAuthController::class, 'ListeLocalisation']);
+Route::get('/Logout', [GoogleAuthController::class, 'logout']);
 
 Route::get('/google-auth', [GoogleAuthController::class, 'loginOrCallback']);
 

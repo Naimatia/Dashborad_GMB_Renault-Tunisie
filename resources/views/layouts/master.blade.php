@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <base href="http://localhost:8000/">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="icon" type="image/png" href="dist/img/icon.png">
 
 @include('layouts.head')
 </head>
@@ -13,7 +14,7 @@
 
   <!-- Preloader -->
   <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+    <img class="animation__shake" src="dist/img/icon.png" alt="AdminLTELogo" height="80" width="80">
   </div>
 
 @include('layouts.main-headbar')
@@ -47,6 +48,7 @@
 
 
   </div>
+
 @include('layouts.footer')
 
   <!-- Control Sidebar -->

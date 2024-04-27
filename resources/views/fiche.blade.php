@@ -538,20 +538,39 @@ $totalReviewsCount = count($allReviews);
                                 </td>
                                 <td>
                                     @if (isset($review['comment']))
-                                        {!! nl2br(explode('(Translated by Google)', $review['comment'])[0] ?? $review['comment']) !!}
+                                        <?php
+                                        // Vérifier s'il y a une partie originale
+                                        $originalPos = strpos($review['comment'], '(Original)');
+                                        if ($originalPos !== false) {
+                                            // Extraire la partie après la phrase "(Original)"
+                                            $originalComment = substr($review['comment'], $originalPos + strlen('(Original)'));
+                                            echo nl2br(trim($originalComment));
+                                        } else {
+                                            echo nl2br($review['comment']);
+                                        }
+                                        ?>
                                     @else
                                         Pas de commentaire disponible
                                     @endif
                                 </td>
                                 <td>
                                     @if (isset($review['reviewReply']) && isset($review['reviewReply']['comment']))
-                                        {!! nl2br(
-                                            explode('(Translated by Google)', $review['reviewReply']['comment'])[0] ?? $review['reviewReply']['comment'],
-                                        ) !!}
+                                        <?php
+                                        // Vérifier s'il y a une partie originale
+                                        $originalPos = strpos($review['reviewReply']['comment'], '(Original)');
+                                        if ($originalPos !== false) {
+                                            // Extraire la partie après la phrase "(Original)"
+                                            $originalReply = substr($review['reviewReply']['comment'], $originalPos + strlen('(Original)'));
+                                            echo nl2br(trim($originalReply));
+                                        } else {
+                                            echo nl2br($review['reviewReply']['comment']);
+                                        }
+                                        ?>
                                     @else
                                         Pas de réponse disponible
                                     @endif
                                 </td>
+
 
 
 

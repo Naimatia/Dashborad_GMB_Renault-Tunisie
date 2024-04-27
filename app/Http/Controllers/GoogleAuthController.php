@@ -48,62 +48,99 @@ class GoogleAuthController extends Controller
         }
     }
 
-    // refrech the token
-    private function refreshTokenIfNeeded()
-    {
-        $expiresAt = session('google_expires_at');
-        if ($expiresAt && time() > $expiresAt) {
-            $client = new Google_Client();
-            $client->setClientId(env('GMB_CLIENT_ID'));
-            $client->setClientSecret(env('GMB_CLIENT_SECRET'));
-            $client->setRedirectUri(env('GMB_REDIRECT_URI'));
-
-            // Set refresh token
-            $client->refreshToken(session('google_refresh_token'));
-
-            // Get a new access token
-            $newAccessToken = $client->fetchAccessTokenWithRefreshToken();
-
-            // Store the new access token and expiration time
-            Session::put('google_access_token', $newAccessToken['access_token']);
-            Session::put('google_expires_at', time() + $newAccessToken['expires_in']);
-
-            return true;
-        }
-        return $expiresAt ? true : false;
-    }
 
 
-    // mybusinessbusinessinformation API
+
+
     public function ListeEtablissement()
     {
 
-        if (!$this->refreshTokenIfNeeded()) {
-            return redirect('/')->with('error', 'Access token is not set or refresh failed. Please login again.');
-        }
-        $token = session('google_access_token'); // Votre jeton d'accès réel va ici
-
+        $token = session('google_access_token');
         if (!$token) {
             return redirect('/')->with('error', 'Access token is not set. Please login again.');
         }
 
-        $url = 'https://mybusinessbusinessinformation.googleapis.com/v1/accounts/110996943980669817062/locations?readMask=storefrontAddress,title,name';
+        // Base URL for Google My Business API
+        $baseUrl = 'https://mybusinessbusinessinformation.googleapis.com/v1/accounts/110996943980669817062/locations';
+        $readMask = 'storefrontAddress,title,name,phoneNumbers';
 
-        $response = Http::withOptions([
-            'verify' => 'E:\PFE package\Dashborad_GMB\cacert.pem',
-        ])->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->get($url);
+        $locations = [];
+        $nextPageToken = null;
 
-        if ($response->failed()) {
-            return redirect('/')->with('error', 'Failed to fetch locations from Google My Business.');
-        }
+        // Loop to fetch all pages
+        do {
+            // Construct the API URL with the readMask and nextPageToken
+            $url = $baseUrl . '?readMask=' . $readMask;
+            if ($nextPageToken) {
+                $url .= '&pageToken=' . $nextPageToken;
+            }
 
-        $locations = $response->json();
+            // Make the API request
+            $response = Http::withOptions([
+                'verify' => 'E:\PFE package\Dashborad_GMB\cacert.pem',
+            ])->withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+            ])->get($url);
 
-        // Faites quelque chose avec les données, par exemple, les retourner ou les afficher
+            if ($response->failed()) {
+                return redirect('/')->with('error', 'Failed to fetch locations from Google My Business.');
+            }
+
+            // Get the JSON data from the response
+            $data = $response->json();
+
+            // Append the current page's locations to the locations array
+            if (isset($data['locations'])) {
+                foreach ($data['locations'] as &$location) {
+                    // Get the location ID from the name field
+                    $locationId = explode('/', $location['name'])[1];
+
+                    // Make the request to the Google My Business Verifications API
+                    $verificationUrl = 'https://mybusinessverifications.googleapis.com/v1/locations/' . $locationId . '/verifications';
+
+                    // Make the API request to check the verification status
+                    $verificationResponse = Http::withOptions([
+                        'verify' => 'E:\PFE package\Dashborad_GMB\cacert.pem',
+                    ])->withHeaders([
+                        'Authorization' => 'Bearer ' . $token,
+                    ])->get($verificationUrl);
+
+
+                    if ($verificationResponse->successful()) {
+                        $verificationData = $verificationResponse->json();
+
+                        // Check if the verification is completed
+                        if (isset($verificationData['verifications']) && !empty($verificationData['verifications'])) {
+                            foreach ($verificationData['verifications'] as $verification) {
+                                if ($verification['state'] === 'COMPLETED') {
+                                    // The location is verified
+                                    $location['verified'] = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // If the verification status was not found, the location is not verified
+                    if (!isset($location['verified'])) {
+                        $location['verified'] = false;
+                    }
+                }
+            }
+
+            // Append the current page's locations to the locations array
+            $locations = array_merge($locations, $data['locations']);
+
+            // Get the nextPageToken from the response
+            $nextPageToken = $data['nextPageToken'] ?? null;
+        } while ($nextPageToken); // Continue the loop as long as there's a nextPageToken
+        // dd($locations);
+        // Return the locations data to the view with verification status
         return view('locations', compact('locations'));
     }
+
+
+
 
     public function PerfermanceAPI(Request $request, $id)
     {
@@ -122,11 +159,6 @@ class GoogleAuthController extends Controller
         $startLastYear = $startYear - 1;
         $endLastYear = $endYear - 1;
 
-
-
-        if (!$this->refreshTokenIfNeeded()) {
-            return redirect('/')->with('error', 'Access token is not set or refresh failed. Please login again.');
-        }
         $token = session('google_access_token');
 
         if (!$token) {
@@ -189,9 +221,6 @@ class GoogleAuthController extends Controller
     public function ALLReview()
     {
 
-        if (!$this->refreshTokenIfNeeded()) {
-            return redirect('/')->with('error', 'Access token is not set or refresh failed. Please login again.');
-        }
         $token = session('google_access_token'); // Votre jeton d'accès réel va ici
 
         if (!$token) {
@@ -236,9 +265,6 @@ class GoogleAuthController extends Controller
         $startLastYear = $startYear - 1;
         $endLastYear = $endYear - 1;
 
-        if (!$this->refreshTokenIfNeeded()) {
-            return redirect('/')->with('error', 'Access token is not set or refresh failed. Please login again.');
-        }
         $token = session('google_access_token');
 
         if (!$token) {
@@ -337,5 +363,112 @@ class GoogleAuthController extends Controller
             // For regular requests, return the view with data
             return view('fiche', compact('currentYearPerformanceData', 'lastYearPerformanceData', 'allReviews', 'totalReviewCount', 'averageRating', 'token', 'id'));
         }
+    }
+
+    public function ListeLocalisation(Request $request)
+    {
+        $token = session('google_access_token');
+        if (!$token) {
+            return redirect('/')->with('error', 'Access token is not set. Please login again.');
+        }
+
+        // Base URL for Google My Business API
+        $baseUrl = 'https://mybusinessbusinessinformation.googleapis.com/v1/accounts/110996943980669817062/locations';
+        $readMask = 'latlng,title,name';
+
+        // Array to store locations' data
+        $coordinates = [];
+
+        // Variable to keep track of the number of verified locations
+        $verifiedCount = 0;
+
+        // Array to store performance data for each location
+        $performanceData = [];
+
+        // Retrieve date range from request query parameters
+        $startYear = $request->query('startYear');
+        $startMonth = $request->query('startMonth');
+        $startDay = $request->query('startDay');
+        $endYear = $request->query('endYear');
+        $endMonth = $request->query('endMonth');
+        $endDay = $request->query('endDay');
+
+        // Loop to fetch all pages
+        $nextPageToken = null;
+        do {
+            // Construct the API URL with the readMask and nextPageToken
+            $url = $baseUrl . '?readMask=' . $readMask;
+            if ($nextPageToken) {
+                $url .= '&pageToken=' . $nextPageToken;
+            }
+
+            $response = Http::withOptions([
+                'verify' => 'E:\\PFE package\\Dashborad_GMB\\cacert.pem',
+            ])->withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+            ])->get($url);
+
+            if ($response->failed()) {
+                return redirect('/')->with('error', 'Failed to fetch data from Google My Business.');
+            }
+
+            // Get the JSON data from the response
+            $data = $response->json();
+
+            // Process each location
+            foreach ($data['locations'] as $location) {
+                // Add location data to coordinates array
+                $coordinates[] = $location;
+
+                // Extract location ID from the location name
+                $locationId = explode('/', $location['name'])[1];
+
+                // Fetch and add performance data using the PerfermanceAPI function
+                // Pass the date range parameters to the PerfermanceAPI function
+                $performance = $this->PerfermanceAPI($request, $locationId);
+
+                $performanceData[$locationId] = [
+                    'title' => $location['title'],
+                    'performance' => $performance
+                ];
+
+
+                // Check verification status
+                $verificationUrl = "https://mybusinessverifications.googleapis.com/v1/locations/{$locationId}/verifications";
+                $verificationResponse = Http::withOptions([
+                    'verify' => 'E:\\PFE package\\Dashborad_GMB\\cacert.pem',
+                ])->withHeaders([
+                    'Authorization' => 'Bearer ' . $token,
+                ])->get($verificationUrl);
+
+                if ($verificationResponse->successful()) {
+                    $verificationData = $verificationResponse->json();
+                    $verifications = $verificationData['verifications'] ?? [];
+
+                    // Check verification state for each location
+                    foreach ($verifications as $verification) {
+                        if ($verification['state'] === 'COMPLETED') {
+                            $verifiedCount++;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Get nextPageToken from response
+            $nextPageToken = $data['nextPageToken'] ?? null;
+        } while ($nextPageToken);
+
+    if ($request->ajax()) {
+        // For AJAX requests, return JSON data for both years
+        return response()->json([
+            'coordinates' => $coordinates,
+        'verifiedCount' => $verifiedCount,
+        'performanceData' => $performanceData
+        ]);
+    } else {
+        // For regular requests, return the view with both years' data
+        return view('dashbord', compact('coordinates', 'verifiedCount', 'performanceData'));
+    }
     }
 }
