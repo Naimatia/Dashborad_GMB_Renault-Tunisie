@@ -20,11 +20,8 @@ Route::get('/', function () {
  return view('dashbord');
 });
 */
-Route::get('/Login', function () {
-    return view('test');
-   });
-Route::get('/', [GoogleAuthController::class, 'ListeLocalisation']);
-Route::get('/Logout', [GoogleAuthController::class, 'logout']);
+
+Route::get('/', [GoogleAuthController::class, 'ListeLocalisation'])->middleware('auth')->name('home');
 
 Route::get('/google-auth', [GoogleAuthController::class, 'loginOrCallback']);
 
@@ -39,8 +36,6 @@ Route::get('/Établissements', [GoogleAuthController::class, 'ListeEtablissement
 Route::get('/fiche/{id}',  [GoogleAuthController::class, 'GetPerfermanceReviews'])->name('fiche');
 
 
-Route::get('/ask', function () {
-    return view('ask_question');
-});
-
-Route::post('/ask', [OpenAIController::class, 'askQuestion'])->name('ask.question');
+Route::get('/logout', [GoogleAuthController::class, 'logout'])->name('logout');
+Route::get('/error', function () {
+    return view('error');});

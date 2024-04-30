@@ -2,7 +2,7 @@
 
 
 @section('title')
-    Home
+    Accueil
 @stop
 
 @section('css')
@@ -11,30 +11,23 @@
 @endsection
 
 @section('title_head')
-    Bienvenue
+    GMBapi : Votre logiciel de SEO local multi-établissements
 @endsection
 
 @section('title_page1')
-    home
+    Accueil
 @endsection
 
 @section('title_page2')
 @endsection
 
+
 @section('content')
     @if (session('status'))
-        <div class="alert alert-success">
-            {{ session('status') }}
-        </div>
-    @endif
-
-    @if (session('error'))
         <script>
-            alert("{{ session('error') }}");
+            alert('{{ session('status') }}');
         </script>
     @endif
-
-    <a href="{{ url('/auth/google') }}">Login with Google</a>
 
     <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
@@ -200,7 +193,6 @@
 @section('scripts')
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <!-- Incluez les scripts et styles de Leaflet -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -266,140 +258,126 @@
 
 
     <script>
-
-
-function calculateImpressionsSum(rawData) {
-    // Initialiser les sommes des métriques d'impressions
-    const sums = {
-        'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH': 0,
-        'BUSINESS_IMPRESSIONS_MOBILE_MAPS': 0,
-        'BUSINESS_IMPRESSIONS_DESKTOP_MAPS': 0,
-        'BUSINESS_IMPRESSIONS_MOBILE_SEARCH': 0
-    };
-
-    // Initialiser les données pour le graphique
-    const graphConseltationData = [];
-
-    // Parcourir toutes les localisations dans rawData
-    for (const locationId in rawData.performanceData) {
-        const locationData = rawData.performanceData[locationId];
-
-        // Vérifier si les données de l'année actuelle existent
-        if (locationData && locationData.performance && locationData.performance.original && locationData.performance.original.currentYearData) {
-            const currentYearData = locationData.performance.original.currentYearData;
-
-            // Initialiser les sommes pour chaque localité
-            const titleSums = {
+        function calculateImpressionsSum(rawData) {
+            // Initialiser les sommes des métriques d'impressions
+            const sums = {
                 'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH': 0,
                 'BUSINESS_IMPRESSIONS_MOBILE_MAPS': 0,
                 'BUSINESS_IMPRESSIONS_DESKTOP_MAPS': 0,
                 'BUSINESS_IMPRESSIONS_MOBILE_SEARCH': 0
             };
 
-            // Vérifier s'il y a des `multiDailyMetricTimeSeries`
-            if (currentYearData.multiDailyMetricTimeSeries) {
-                for (const metricData of currentYearData.multiDailyMetricTimeSeries) {
-                    for (const metricTimeSeries of metricData.dailyMetricTimeSeries) {
-                        const { dailyMetric, timeSeries } = metricTimeSeries;
+            // Initialiser les données pour le graphique
+            const graphConseltationData = [];
 
-                        // Vérifier si la métrique est pertinente
-                        if (sums.hasOwnProperty(dailyMetric) && timeSeries && timeSeries.datedValues) {
-                            for (const datedValue of timeSeries.datedValues) {
-                                const value = parseFloat(datedValue.value);
-                                if (!isNaN(value)) {
-                                    // Ajouter la valeur à la somme appropriée
-                                    sums[dailyMetric] += value;
-                                    titleSums[dailyMetric] += value;
+            // Parcourir toutes les localisations dans rawData
+            for (const locationId in rawData.performanceData) {
+                const locationData = rawData.performanceData[locationId];
+
+                // Vérifier si les données de l'année actuelle existent
+                if (locationData && locationData.performance && locationData.performance.original && locationData
+                    .performance.original.currentYearData) {
+                    const currentYearData = locationData.performance.original.currentYearData;
+
+                    // Initialiser les sommes pour chaque localité
+                    const titleSums = {
+                        'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH': 0,
+                        'BUSINESS_IMPRESSIONS_MOBILE_MAPS': 0,
+                        'BUSINESS_IMPRESSIONS_DESKTOP_MAPS': 0,
+                        'BUSINESS_IMPRESSIONS_MOBILE_SEARCH': 0
+                    };
+
+                    // Vérifier s'il y a des `multiDailyMetricTimeSeries`
+                    if (currentYearData.multiDailyMetricTimeSeries) {
+                        for (const metricData of currentYearData.multiDailyMetricTimeSeries) {
+                            for (const metricTimeSeries of metricData.dailyMetricTimeSeries) {
+                                const {
+                                    dailyMetric,
+                                    timeSeries
+                                } = metricTimeSeries;
+
+                                // Vérifier si la métrique est pertinente
+                                if (sums.hasOwnProperty(dailyMetric) && timeSeries && timeSeries.datedValues) {
+                                    for (const datedValue of timeSeries.datedValues) {
+                                        const value = parseFloat(datedValue.value);
+                                        if (!isNaN(value)) {
+                                            // Ajouter la valeur à la somme appropriée
+                                            sums[dailyMetric] += value;
+                                            titleSums[dailyMetric] += value;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+
+                    // Ajouter les données de titre et les sommes au graphique
+                    graphConseltationData.push({
+                        title: locationData.title,
+                        sums: titleSums
+                    });
                 }
             }
 
-            // Ajouter les données de titre et les sommes au graphique
-            graphConseltationData.push({
-                title: locationData.title,
-                sums: titleSums
-            });
+            // Calculer la somme totale de toutes les impressions
+            const totalImpressionsSum = Object.values(sums).reduce((acc, value) => acc + value, 0);
+
+            // Retourner l'objet contenant la somme totale et les données pour le graphique
+            return {
+                totalImpressionsSum,
+                graphConseltationData
+            };
         }
-    }
 
-    // Calculer la somme totale de toutes les impressions
-    const totalImpressionsSum = Object.values(sums).reduce((acc, value) => acc + value, 0);
+        function displayConseltationGraph(graphData) {
+            // Préparer les labels et les datasets pour le graphique
+            const labels = graphData.map(data => data.title);
+            const dataset = {
+                label: 'Consultation Totales',
+                data: graphData.map(data => {
+                    // Calculer la somme totale des impressions pour chaque localité
+                    return data.sums.BUSINESS_IMPRESSIONS_DESKTOP_SEARCH +
+                        data.sums.BUSINESS_IMPRESSIONS_MOBILE_MAPS +
+                        data.sums.BUSINESS_IMPRESSIONS_DESKTOP_MAPS +
+                        data.sums.BUSINESS_IMPRESSIONS_MOBILE_SEARCH;
+                }),
+                fill: false,
+                borderColor: 'white', // Changer la couleur de la ligne du graphique en blanc
+                tension: 0.1
+            };
 
-    // Retourner l'objet contenant la somme totale et les données pour le graphique
-    return { totalImpressionsSum, graphConseltationData };
-}
-function displayConseltationGraph(graphData) {
-    // Préparer les labels et les datasets pour le graphique
-    const labels = graphData.map(data => data.title);
-    const dataset = {
-        label: 'Consultation Totales',
-        data: graphData.map(data => {
-            // Calculer la somme totale des impressions pour chaque localité
-            return data.sums.BUSINESS_IMPRESSIONS_DESKTOP_SEARCH +
-                   data.sums.BUSINESS_IMPRESSIONS_MOBILE_MAPS +
-                   data.sums.BUSINESS_IMPRESSIONS_DESKTOP_MAPS +
-                   data.sums.BUSINESS_IMPRESSIONS_MOBILE_SEARCH;
-        }),
-        fill: false,
-        borderColor: 'white', // Changer la couleur de la ligne du graphique en blanc
-        tension: 0.1
-    };
+            // Récupérer le contexte du canevas
+            const ctx = document.getElementById('conseltation-chart').getContext('2d');
 
-    // Récupérer le contexte du canevas
-    const ctx = document.getElementById('conseltation-chart').getContext('2d');
-
-    // Créer le graphique linéaire
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [dataset]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        color: 'white' // Changer la couleur du titre du label en blanc
+            // Créer le graphique linéaire
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [dataset]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white' // Changer la couleur du titre du label en blanc
+                            }
+                        }
                     }
                 }
-            }
+            });
         }
-    });
-}
 
-function calculateSumOfValues(rawData) {
-    // Initialiser les sommes des métriques
-    const sums = {
-        CALL_CLICKS: 0,
-        WEBSITE_CLICKS: 0,
-        BUSINESS_CONVERSATIONS: 0,
-        BUSINESS_DIRECTION_REQUESTS: 0,
-        BUSINESS_BOOKINGS: 0
-    };
-
-    // Initialiser les données pour le graphique
-    const graphInteractionData = [];
-
-    // Parcourir toutes les localisations dans rawData
-    for (const locationId in rawData.performanceData) {
-        const locationData = rawData.performanceData[locationId];
-
-        // Vérifier si les données de l'année actuelle existent
-        if (locationData && locationData.performance && locationData.performance.original && locationData.performance.original.currentYearData) {
-            const currentYearData = locationData.performance.original.currentYearData;
-
-            // Initialiser les sommes pour chaque titre
-            const titleSums = {
+        function calculateSumOfValues(rawData) {
+            // Initialiser les sommes des métriques
+            const sums = {
                 CALL_CLICKS: 0,
                 WEBSITE_CLICKS: 0,
                 BUSINESS_CONVERSATIONS: 0,
@@ -407,80 +385,107 @@ function calculateSumOfValues(rawData) {
                 BUSINESS_BOOKINGS: 0
             };
 
-            // Vérifier s'il y a des `multiDailyMetricTimeSeries`
-            if (currentYearData.multiDailyMetricTimeSeries) {
-                for (const metricData of currentYearData.multiDailyMetricTimeSeries) {
-                    for (const metricTimeSeries of metricData.dailyMetricTimeSeries) {
-                        const { dailyMetric, timeSeries } = metricTimeSeries;
+            // Initialiser les données pour le graphique
+            const graphInteractionData = [];
 
-                        if (sums.hasOwnProperty(dailyMetric) && timeSeries && timeSeries.datedValues) {
-                            for (const datedValue of timeSeries.datedValues) {
-                                const value = parseFloat(datedValue.value);
-                                if (!isNaN(value)) {
-                                    sums[dailyMetric] += value;
-                                    titleSums[dailyMetric] += value;
+            // Parcourir toutes les localisations dans rawData
+            for (const locationId in rawData.performanceData) {
+                const locationData = rawData.performanceData[locationId];
+
+                // Vérifier si les données de l'année actuelle existent
+                if (locationData && locationData.performance && locationData.performance.original && locationData
+                    .performance.original.currentYearData) {
+                    const currentYearData = locationData.performance.original.currentYearData;
+
+                    // Initialiser les sommes pour chaque titre
+                    const titleSums = {
+                        CALL_CLICKS: 0,
+                        WEBSITE_CLICKS: 0,
+                        BUSINESS_CONVERSATIONS: 0,
+                        BUSINESS_DIRECTION_REQUESTS: 0,
+                        BUSINESS_BOOKINGS: 0
+                    };
+
+                    // Vérifier s'il y a des `multiDailyMetricTimeSeries`
+                    if (currentYearData.multiDailyMetricTimeSeries) {
+                        for (const metricData of currentYearData.multiDailyMetricTimeSeries) {
+                            for (const metricTimeSeries of metricData.dailyMetricTimeSeries) {
+                                const {
+                                    dailyMetric,
+                                    timeSeries
+                                } = metricTimeSeries;
+
+                                if (sums.hasOwnProperty(dailyMetric) && timeSeries && timeSeries.datedValues) {
+                                    for (const datedValue of timeSeries.datedValues) {
+                                        const value = parseFloat(datedValue.value);
+                                        if (!isNaN(value)) {
+                                            sums[dailyMetric] += value;
+                                            titleSums[dailyMetric] += value;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+
+                    // Ajouter les données de titre et les sommes au graphique
+                    graphInteractionData.push({
+                        title: locationData.title,
+                        sums: titleSums
+                    });
                 }
             }
 
-            // Ajouter les données de titre et les sommes au graphique
-            graphInteractionData.push({
-                title: locationData.title,
-                sums: titleSums
-            });
+            // Calculer la somme totale de toutes les métriques
+            const totalSum = Object.values(sums).reduce((acc, value) => acc + value, 0);
+
+            // Retourner l'objet contenant la somme totale et les données pour le graphique
+            return {
+                totalSum,
+                graphInteractionData
+            };
         }
-    }
 
-    // Calculer la somme totale de toutes les métriques
-    const totalSum = Object.values(sums).reduce((acc, value) => acc + value, 0);
+        function displaySalesGraph(graphData) {
+            // Préparer les labels et les datasets pour le graphique
+            const labels = graphData.map(data => data.title);
+            const dataset = {
+                label: 'Interactions Totales',
+                data: graphData.map(data => {
+                    return Object.values(data.sums).reduce((acc, value) => acc + value, 0);
+                }),
+                fill: false,
+                borderColor: 'white',
+                tension: 0.1
+            };
 
-    // Retourner l'objet contenant la somme totale et les données pour le graphique
-    return { totalSum, graphInteractionData };
-}
+            // Récupérer le contexte du canevas
+            const ctx = document.getElementById('line-chart').getContext('2d');
 
-function displaySalesGraph(graphData) {
-    // Préparer les labels et les datasets pour le graphique
-    const labels = graphData.map(data => data.title);
-    const dataset = {
-        label: 'Interactions Totales',
-        data: graphData.map(data => {
-            return Object.values(data.sums).reduce((acc, value) => acc + value, 0);
-        }),
-        fill: false,
-        borderColor: 'white',
-        tension: 0.1
-    };
-
-    // Récupérer le contexte du canevas
-    const ctx = document.getElementById('line-chart').getContext('2d');
-
-    // Créer le graphique linéaire
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [dataset]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        color: 'white' // Changer la couleur du titre du label à blanc
+            // Créer le graphique linéaire
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [dataset]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white' // Changer la couleur du titre du label à blanc
+                            }
+                        }
                     }
                 }
-            }
+            });
         }
-    });
-}
     </script>
 @endsection

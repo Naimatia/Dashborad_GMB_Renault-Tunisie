@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Google_Client;
+use App\Models\User;
+use Google\Service\Oauth2;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Session;
 
 class GoogleAuthController extends Controller
 {
@@ -23,7 +28,7 @@ class GoogleAuthController extends Controller
 
         return redirect()->to($client->createAuthUrl());
     }
-
+    
     public function handleGoogleCallback(Request $request)
     {
         $client = new Google_Client();
@@ -35,18 +40,81 @@ class GoogleAuthController extends Controller
         try {
             $accessToken = $client->fetchAccessTokenWithAuthCode($request->code);
             if (isset($accessToken['error'])) {
-                return redirect('/')->with('error', 'Failed to log in with Google: ' . $accessToken['error_description']);
+                return redirect('/error')->with('error', 'Failed to log in with Google: ' . $accessToken['error_description']);
             }
-            // Assurez-vous de stocker juste le token d'accès, pas tout le tableau
+
+            // Stockage des tokens
             Session::put('google_access_token', $accessToken['access_token']);
             Session::put('google_refresh_token', $client->getRefreshToken());
-            // Calculer et stocker le temps d'expiration
             Session::put('google_expires_at', time() + $accessToken['expires_in']);
+
+            // Obtenir les informations de l'utilisateur
+            $oauthService = new Oauth2($client);
+            $googleUser = $oauthService->userinfo->get();
+
+            // Recherche ou création de l'utilisateur
+            $user = User::firstOrCreate([
+                'email' => $googleUser->email,
+            ], [
+                'name' => $googleUser->name,
+                // Générer un mot de passe par défaut si l'utilisateur est créé
+                'password' => bcrypt(Str::random(16)),
+                // Mettez à jour d'autres informations utilisateur si nécessaire
+            ]);
+
+
+            // Connexion de l'utilisateur
+            Auth::login($user);
+
+            // Redirection après une connexion réussie
             return redirect('/')->with('status', 'Logged in with Google successfully.');
         } catch (\Exception $e) {
-            return redirect('/')->with('error', 'Failed to log in with Google: ' . $e->getMessage());
+            return redirect('/error')->with('error', 'Failed to log in with Google: ' . $e->getMessage());
         }
     }
+
+
+
+
+    public function logout(Request $request)
+    {
+        // Instancier le client Google
+        $client = new \Google_Client();
+        $client->setClientId(env('GMB_CLIENT_ID'));
+        $client->setClientSecret(env('GMB_CLIENT_SECRET'));
+        $client->setHttpClient(new \GuzzleHttp\Client(['verify' => 'E:\PFE package\Dashborad_GMB\cacert.pem']));
+
+
+        // Obtenir le token d'accès stocké
+        $accessToken = Session::get('google_access_token');
+
+        if ($accessToken) {
+            // Révoquer le token d'accès auprès de Google
+            $client->revokeToken($accessToken);
+        }
+
+        // Supprimer les tokens et données de session
+        Session::forget('google_access_token');
+        Session::forget('google_refresh_token');
+        Session::forget('google_expires_at');
+
+        // Nettoyer d'autres données de session liées à l'utilisateur (si nécessaire)
+
+        // Invalider la session
+        $request->session()->invalidate();
+        // Régénérer le token de session
+        $request->session()->regenerateToken();
+
+        // Supprimer tous les cookies liés à l'authentification
+        Cookie::queue(Cookie::forget('google_access_token'));
+        Cookie::queue(Cookie::forget('google_refresh_token'));
+        Cookie::queue(Cookie::forget('google_user_info'));
+
+        // Rediriger vers la page de connexion de Google
+        return redirect('/auth/google');
+    }
+
+
 
 
 
@@ -459,16 +527,16 @@ class GoogleAuthController extends Controller
             $nextPageToken = $data['nextPageToken'] ?? null;
         } while ($nextPageToken);
 
-    if ($request->ajax()) {
-        // For AJAX requests, return JSON data for both years
-        return response()->json([
-            'coordinates' => $coordinates,
-        'verifiedCount' => $verifiedCount,
-        'performanceData' => $performanceData
-        ]);
-    } else {
-        // For regular requests, return the view with both years' data
-        return view('dashbord', compact('coordinates', 'verifiedCount', 'performanceData'));
-    }
+        if ($request->ajax()) {
+            // For AJAX requests, return JSON data for both years
+            return response()->json([
+                'coordinates' => $coordinates,
+                'verifiedCount' => $verifiedCount,
+                'performanceData' => $performanceData
+            ]);
+        } else {
+            // For regular requests, return the view with both years' data
+            return view('dashbord', compact('coordinates', 'verifiedCount', 'performanceData'));
+        }
     }
 }

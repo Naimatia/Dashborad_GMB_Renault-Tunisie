@@ -873,6 +873,11 @@ $totalReviewsCount = count($allReviews);
                 growthRateInteractionDisplay.textContent = Math.abs(interactionGrowthRate).toFixed(1);
                 growthRateInteractionDisplay.classList.add('text-danger'); // Add class to display in red
                 growthRateInteractionDisplay.innerHTML += '% <i class="fas fa-caret-down"></i>';
+            } else if (interactionGrowthRate === -1) {
+                growthRateInteractionDisplay.textContent = interactionGrowthRate.toFixed(1);
+                growthRateInteractionDisplay.classList.remove('text-danger');
+                growthRateInteractionDisplay.classList.add('text-success'); // Remove class to display in green
+                growthRateInteractionDisplay.innerHTML += '% <i class="fas fa-caret-up"></i>';
             } else if (interactionGrowthRate > 0) {
                 growthRateInteractionDisplay.textContent = interactionGrowthRate.toFixed(1);
                 growthRateInteractionDisplay.classList.remove('text-danger');
@@ -969,7 +974,7 @@ $totalReviewsCount = count($allReviews);
 
                 if (growthElement) {
                     if (isNaN(parseFloat(percentage))) {
-                        growthElement.textContent = 'N/A'; // Afficher N/A si la valeur n'est pas un nombre
+                        growthElement.textContent = 'Nouveau'; // Afficher Nouveau si la valeur n'est pas un nombre
                         growthElement.classList.add('text-warning'); // Ajouter la classe pour afficher en vert
 
                     } else {
@@ -1014,12 +1019,12 @@ $totalReviewsCount = count($allReviews);
                     }
                 } else {
                     // Si la croissance n'est pas un nombre
-                    growthRateWebElement.textContent = 'N/A';
+                    growthRateWebElement.textContent = 'Nouveau';
                     growthRateWebElement.classList.add('text-warning');
                 }
             } else {
                 // Si les données de croissance pour les clics vers le site web ne sont pas disponibles
-                growthRateWebElement.textContent = 'N/A';
+                growthRateWebElement.textContent = 'Nouveau';
                 growthRateWebElement.classList.add('text-warning');
             }
 
@@ -1032,7 +1037,7 @@ $totalReviewsCount = count($allReviews);
                 totalWebInteractionElement.textContent = totalWebInteraction;
             } else {
                 // Si les données du total des interactions avec le site web ne sont pas disponibles
-                totalWebInteractionElement.textContent = 'N/A';
+                totalWebInteractionElement.textContent = 'Nouveau';
                 totalWebInteractionElement.classList.add('text-warning');
             }
             // statistique des Reservation
@@ -1058,12 +1063,12 @@ $totalReviewsCount = count($allReviews);
                     }
                 } else {
                     // Si la croissance n'est pas un nombre
-                    growthRateReservationElement.textContent = 'N/A';
+                    growthRateReservationElement.textContent = 'Nouveau';
                     growthRateReservationElement.classList.add('text-warning');
                 }
             } else {
                 // Si les données de croissance pour les conversations commerciales ne sont pas disponibles
-                growthRateReservationElement.textContent = 'N/A';
+                growthRateReservationElement.textContent = 'Nouveau';
                 growthRateReservationElement.classList.add('text-warning');
             }
 
@@ -1077,7 +1082,7 @@ $totalReviewsCount = count($allReviews);
                 totalConversationInteractionElement.textContent = totalConversationInteraction;
             } else {
                 // Si les données du total des interactions commerciales avec le site web ne sont pas disponibles
-                totalConversationInteractionElement.textContent = 'N/A';
+                totalConversationInteractionElement.textContent = 'Nouveau';
                 totalConversationInteractionElement.classList.add('text-warning');
             }
 
@@ -1171,13 +1176,24 @@ $totalReviewsCount = count($allReviews);
                 });
 
                 // Calculer le taux de croissance
-                const growthRate = ((currentYearTotal - lastYearTotal) / lastYearTotal) * 100;
-                interactionGrowthRates[metric] = growthRate.toFixed(1); // Arrondir à une décimale
+                let growthRate;
+                if (lastYearTotal === 0) {
+                    // Si lastYearTotal est égal à 0, on définit growthRate à null ou undefined pour indiquer une croissance non calculable
+                    growthRate = null; // ou undefined, selon vos besoins
+                } else {
+                    // Calcul normal du taux de croissance
+                    growthRate = ((currentYearTotal - lastYearTotal) / lastYearTotal) * 100;
+                    interactionGrowthRates[metric] = growthRate.toFixed(1); // Arrondir à une décimale
+                }
 
+                // Ajouter growthRate à interactionGrowthRates pour chaque metric
+                interactionGrowthRates[metric] = growthRate !== null ? growthRate.toFixed(1) :
+                null; // ou undefined, selon vos besoins
             });
 
             return interactionGrowthRates;
         }
+
 
 
         // Render the charts

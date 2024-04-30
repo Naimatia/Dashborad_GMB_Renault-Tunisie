@@ -54,5 +54,15 @@
     .daterangepicker .drp-calendar.left {
         border-right: none;
     }
+    /* Masquer le texte "Logout" par défaut */
+.logout-text {
+    display: none;
+}
+
+/* Afficher le texte "Logout" lors du hover sur le lien */
+.logout-link:hover .logout-text {
+    display: inline;
+}
+
 </style>
 @yield('css')

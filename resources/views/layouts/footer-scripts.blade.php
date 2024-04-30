@@ -188,6 +188,8 @@
             LocationAjaxCall(startDate, endDate);
         });
     });
+
+   
 </script>
 
 @yield('scripts')
