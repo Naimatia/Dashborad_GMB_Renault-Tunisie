@@ -215,7 +215,7 @@
 
                                         <!-- /.progress-group -->
                                         <div class="progress-group">
-                                            Réservations effectuées
+                                            Réservations reçues
                                             <span class="float-right"><b id="reservationsCount"></b>/
                                                 <span id="cartTotalInteraction4"></span></span>
                                             <div class="progress progress-sm">
@@ -227,7 +227,7 @@
                                         <!-- /.progress-group -->
 
                                         <div class="progress-group">
-                                            Messages envoyés
+                                            Messages reçues
                                             <span class="float-right"><b id="messagesCount"></b>/
                                                 <span id="cartTotalInteraction5"></span></span>
                                             <div class="progress progress-sm">

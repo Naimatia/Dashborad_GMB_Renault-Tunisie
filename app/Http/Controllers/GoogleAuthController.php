@@ -28,7 +28,7 @@ class GoogleAuthController extends Controller
 
         return redirect()->to($client->createAuthUrl());
     }
-    
+
     public function handleGoogleCallback(Request $request)
     {
         $client = new Google_Client();
