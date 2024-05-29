@@ -23,10 +23,6 @@ Route::get('/', function () {
 
 Route::get('/', [GoogleAuthController::class, 'ListeLocalisation'])->middleware('auth')->name('home');
 
-Route::get('/google-auth', [GoogleAuthController::class, 'loginOrCallback']);
-
-Route::get('/refreshAccessToken', [GoogleAuthController::class, 'refreshAccessToken']);
-Route::get('/callGoogleApi', [GoogleAuthController::class, 'callGoogleApi']);
 
 
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
