@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\OpenAIController;
+use App\Http\Controllers\DashbordController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\EtablissementController;
+use App\Http\Controllers\GoogleLocationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,23 +17,16 @@ use App\Http\Controllers\GoogleAuthController;
 |
 */
 
-/*
-Route::get('/', function () {
- return view('dashbord');
+Route::middleware('auth')->group(function () {
+    Route::get('/', [DashbordController::class, 'ListeLocalisation'])->name('home');
+    Route::get('/Établissements', [GoogleLocationController::class, 'ListeEtablissement'])->name('Établissements');
+    Route::get('/fiche/{id}', [EtablissementController::class, 'GetPerfermanceReviews'])->name('fiche');
+    Route::get('/logout', [GoogleAuthController::class, 'logout'])->name('logout');
+    Route::get('/error', function () {
+        return view('error');
+    });
 });
-*/
 
-Route::get('/', [GoogleAuthController::class, 'ListeLocalisation'])->middleware('auth')->name('home');
-
-
-
+// Google authentication routes without auth middleware
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
-Route::get('/Établissements', [GoogleAuthController::class, 'ListeEtablissement'])->name('Établissements');
-//Route::get('/fiche/{id}',  [GoogleAuthController::class, 'PerfermanceAPI'])->name('fiche.performance');
-Route::get('/fiche/{id}',  [GoogleAuthController::class, 'GetPerfermanceReviews'])->name('fiche');
-
-
-Route::get('/logout', [GoogleAuthController::class, 'logout'])->name('logout');
-Route::get('/error', function () {
-    return view('error');});

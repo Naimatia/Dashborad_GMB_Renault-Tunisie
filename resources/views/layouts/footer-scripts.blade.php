@@ -1,6 +1,6 @@
 <!-- jQuery -->
 <script src="plugins/jquery/jquery.min.js"></script>
-<!-- jQuery UI 1.11.4 -->
+<!-- jQuery UI -->
 <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
 <script>
@@ -32,21 +32,20 @@
 <script src="dist/js/demo.js"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="dist/js/pages/dashboard.js"></script>
-<!-- Include the Chart.js library -->
+
+<!-- Include the Chart.js library from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include jQuery and Bootstrap from CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-<!-- daterangepicker JS -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Incluez les scripts et styles de Leaflet -->
+<!-- Include daterangepicker from CDN -->
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<!-- Include Leaflet -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<!-- date period -->
 <script>
-    $(function() {
+    $(window).on('load', function() {
         // Debounce function to limit the rate at which a function can fire
         function debounce(func, wait) {
             let timeout;
@@ -110,7 +109,7 @@
         // Define function to perform AJAX call for 'fiche' page
         function performAjaxCall(id, startDate, endDate) {
             $.ajax({
-                url: 'http://localhost:8000/fiche/' + id,
+                url: '/fiche/' + id,
                 type: 'GET',
                 data: {
                     startYear: startDate.format('YYYY'),
@@ -138,7 +137,7 @@
         // Define function for AJAX call to retrieve data for the '/' URL
         function LocationAjaxCall(startDate, endDate) {
             $.ajax({
-                url: 'http://localhost:8000/',
+                url: '/',
                 type: 'GET',
                 data: {
                     startYear: startDate.format('YYYY'),

@@ -15,7 +15,8 @@
         "laravel/socialite": "^5.12",
         "laravel/tinker": "^2.8",
         "league/oauth2-client": "^2.7",
-        "php-ai/php-ml": "^0.10.0"
+        "php-ai/php-ml": "^0.10.0",
+        "predis/predis": "^2.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.13",
