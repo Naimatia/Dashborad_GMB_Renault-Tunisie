@@ -28,6 +28,15 @@
             alert('{{ session('status') }}');
         </script>
     @endif
+     <!-- Vérifiez s'il y a une erreur et affichez une alerte -->
+     @if (session('error'))
+     <div class="alert alert-danger alert-dismissible fade show" role="alert">
+         {{ session('error') }}
+         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true">&times;</span>
+         </button>
+     </div>
+ @endif
 
     <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
@@ -195,37 +204,14 @@
 
     <script>
         // Initialisez la carte
-        var map = L.map('map').setView([33.8869, 9.5375], 6); // coordonnées pour centrer sur la Tunisie
+        var map = L.map('map').setView([33.8869, 9.5375], 6); // Coordonnées pour centrer sur la Tunisie
 
         // Ajoutez un fond de carte (vous pouvez choisir un autre style)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-        // Créez un bouton pour centrer la carte sur la position initiale
-        var centerButton = L.control({
-            position: 'topright'
-        });
 
-        centerButton.onAdd = function() {
-            var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-            div.innerHTML = 'Centre'; // Texte du bouton (vous pouvez le personnaliser)
-            div.style.backgroundColor = '#fff';
-            div.style.padding = '5px';
-            div.style.cursor = 'pointer';
-            div.style.borderRadius = '5px';
-
-            // Ajoutez un événement de clic pour centrer la carte sur la position initiale
-            div.onclick = function() {
-                map.setView([33.8869, 9.5375], 6); // Coordonnées pour centrer sur la Tunisie
-            };
-
-            return div;
-        };
-
-        // Ajoutez le bouton à la carte
-        centerButton.addTo(map);
         var coordinates = @json($coordinates); // Passez les données PHP à JavaScript
-
 
         // Ajoutez les marqueurs pour chaque établissement
         coordinates.forEach(function(location) {
@@ -240,17 +226,26 @@
                     offset: [0, -10] // Ajustez la position de la popup si nécessaire
                 });
 
-                // Ajoutez un événement de souris pour afficher et cacher la popup
-                marker.on('mouseover', function() {
-                    marker.openTooltip();
-                });
+                // Ajoutez un événement de clic pour rediriger vers l'URL spécifique
+                marker.on('click', function() {
+                    if (location.name) {
+                        var url = new URL('/fiche/' + location.name.split('/')[1], window.location.origin);
+                        var title = location.title; // Récupérer le titre du marqueur
 
-                marker.on('mouseout', function() {
-                    marker.closeTooltip();
+                        if (title) {
+                            url.searchParams.append('title', title);
+                        }
+
+                        window.location.href = url.toString();
+                    } else {
+                        console.error("Nom du lieu non trouvé pour la redirection.");
+                        // Gérer le cas où le nom n'est pas disponible ou autre erreur de données
+                    }
                 });
             }
         });
     </script>
+
 
 
 

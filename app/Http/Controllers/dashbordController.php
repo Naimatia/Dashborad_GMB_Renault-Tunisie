@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Session;
 
 class DashbordController extends Controller
 {
+
+
     public function PerfermanceAPI(Request $request, $id)
     {
+
         // Retrieve query parameters
         $startYear = $request->query('startYear');
         $startMonth = $request->query('startMonth');
@@ -90,6 +95,7 @@ class DashbordController extends Controller
 
     public function ListeLocalisation(Request $request)
     {
+
         $token = session('google_access_token');
 
         if (!$token) {

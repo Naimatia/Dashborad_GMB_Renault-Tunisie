@@ -1,34 +1,29 @@
    <!-- Main Sidebar Container -->
    <aside class="main-sidebar sidebar-dark-primary elevation-4">
        <!-- Brand Logo -->
-       <a href="index3.html" class="brand-link">
-           <img src="dist/img/icon.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-           <span class="brand-text font-weight-light">GMBapi</span>
+       <a href="#" class="brand-link">
+           <div class="d-flex align-items-center">
+               <img src="dist/img/GMBapi-Logo-White.png" alt="GMBapi Logo" style="width: 50px; height: 50px;">
+               <span class="brand-text ml-2">
+                   <span class="font-weight-bold text-primary">GMB</span>
+                   <span class="text-orange">api.com</span>
+               </span>
+           </div>
        </a>
+
        <!-- Sidebar -->
        <div class="sidebar">
-           <!-- Sidebar user panel (optional) -->
-           <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-               <div class="image">
-                   <img src="dist/img/renault_logo.jpg" class="img-circle elevation-1" alt="User Image">
-               </div>
-               <div class="info">
-                   <a href="#" class="d-block">Renault Tunisie</a>
+
+           <div class="brand-link  pb-3 mb-3 d-flex">
+               <div class="d-flex align-items-center">
+                   <img src="dist/img/renault_logo.png" alt="GMBapi Logo" style="width: 30px; height: 40px; ">
+                   <span class="brand-text ml-2">
+                    <span class="text-white" style="font-size: 18px;">Renault Tunisie</span>
+                </span>
                </div>
            </div>
 
-           <!-- SidebarSearch Form -->
-           <div class="form-inline">
-               <div class="input-group" data-widget="sidebar-search">
-                   <input class="form-control form-control-sidebar" type="search" placeholder="Search"
-                       aria-label="Search">
-                   <div class="input-group-append">
-                       <button class="btn btn-sidebar">
-                           <i class="fas fa-search fa-fw"></i>
-                       </button>
-                   </div>
-               </div>
-           </div>
+
 
            <!-- Sidebar Menu -->
            <nav class="mt-2">
@@ -37,7 +32,7 @@
                    <!-- Add icons to the links using the .nav-icon class
              with font-awesome or any other icon font library -->
                    <!-- Titre blanc -->
-                 
+
                    <li class="nav-item">
                        <a href="{{ route('home') }}" class="nav-link">
                            <i class="nav-icon fas fa-home"></i>

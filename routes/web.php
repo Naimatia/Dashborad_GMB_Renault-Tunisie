@@ -17,7 +17,7 @@ use App\Http\Controllers\GoogleLocationController;
 |
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth' ])->group(function () {
     Route::get('/', [DashbordController::class, 'ListeLocalisation'])->name('home');
     Route::get('/Établissements', [GoogleLocationController::class, 'ListeEtablissement'])->name('Établissements');
     Route::get('/fiche/{id}', [EtablissementController::class, 'GetPerfermanceReviews'])->name('fiche');

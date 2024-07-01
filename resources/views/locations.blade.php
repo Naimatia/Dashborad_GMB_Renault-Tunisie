@@ -5,20 +5,21 @@
 @stop
 
 @section('css')
-  <!-- DataTables -->
-  <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-  <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-  <link rel="stylesheet" href="../../plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
-  <style>
-    /* Hover effect on table rows */
-    table tr:hover {
-        background-color: #f5f5f5; /* Change the background color on hover */
-    }
+    <!-- DataTables -->
+    <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <style>
+        /* Hover effect on table rows */
+        table tr:hover {
+            background-color: #f5f5f5;
+            /* Change the background color on hover */
+        }
     </style>
-  @endsection
+@endsection
 
-  @section('title_head')
-  {{ count($locations) }} Établissement
+@section('title_head')
+    {{ count($locations) }} Établissement
 @endsection
 
 
@@ -33,7 +34,7 @@
 
 @section('content')
 
-@if (!empty($locations))
+    @if (!empty($locations))
 
         <!-- Main content -->
         <section class="content">
@@ -55,10 +56,11 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($locations as $location)
-                                        <tr data-id="{{ explode('/', $location['name'])[1] }}"
+                                            <tr data-id="{{ explode('/', $location['name'])[1] }}"
                                                 data-title="{{ $location['title'] }}">
                                                 <td>{{ $location['title'] ?? 'Aucune Titre' }}</td>
-                                                <td>{{ $location['storefrontAddress']['locality'] ?? 'Aucune Localité' }}</td>
+                                                <td>{{ $location['storefrontAddress']['locality'] ?? 'Aucune Localité' }}
+                                                </td>
                                                 <td>
                                                     @if (isset($location['storefrontAddress']['addressLines']) && is_array($location['storefrontAddress']['addressLines']))
                                                         @foreach ($location['storefrontAddress']['addressLines'] as $addressLine)
@@ -68,7 +70,7 @@
                                                         Aucune adresse
                                                     @endif
                                                 </td>
-                                                                                                </td>
+                                                </td>
                                                 <td>{{ $location['phoneNumbers']['primaryPhone'] ?? 'Aucune Phone Number' }}
                                                 </td>
                                                 <td>
