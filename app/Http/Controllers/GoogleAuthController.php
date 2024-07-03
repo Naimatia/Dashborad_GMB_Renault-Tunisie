@@ -3,22 +3,20 @@
 namespace App\Http\Controllers;
 
 use Google_Client;
-use Google\Service\Oauth2;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Cookie;
+use Google\Service\Oauth2;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Session;
 
 class GoogleAuthController extends Controller
 {
     public function redirectToGoogle()
     {
-        $client = new Google_Client();
-        $client->setClientId(env('GMB_CLIENT_ID'));
-        $client->setClientSecret(env('GMB_CLIENT_SECRET'));
-        $client->setRedirectUri(env('GMB_REDIRECT_URI'));
+        $client = $this->getGoogleClient();
         $client->addScope("https://www.googleapis.com/auth/userinfo.email");
         $client->addScope("https://www.googleapis.com/auth/userinfo.profile");
         $client->addScope("https://www.googleapis.com/auth/business.manage");
@@ -28,26 +26,27 @@ class GoogleAuthController extends Controller
 
     public function handleGoogleCallback(Request $request)
     {
-        $client = new Google_Client();
-        $client->setClientId(env('GMB_CLIENT_ID'));
-        $client->setClientSecret(env('GMB_CLIENT_SECRET'));
-        $client->setRedirectUri(env('GMB_REDIRECT_URI'));
-        $client->setHttpClient(new \GuzzleHttp\Client(['verify' => base_path('cacert.pem')]));
+        Log::info('Handling Google callback');
+
+        $client = $this->getGoogleClient();
 
         try {
             $accessToken = $client->fetchAccessTokenWithAuthCode($request->code);
             if (isset($accessToken['error'])) {
+                Log::error('Error fetching access token: ' . $accessToken['error_description']);
                 return redirect('/error')->with('error', 'Failed to log in with Google: ' . $accessToken['error_description']);
             }
 
-            // Store tokens
-            Session::put('google_access_token', $accessToken['access_token']);
-            Session::put('google_refresh_token', $client->getRefreshToken());
-            Session::put('google_expires_at', time() + $accessToken['expires_in']);
+            Log::info('Access token fetched successfully', ['access_token' => $accessToken]);
+
+            // Store tokens in the session
+            $this->storeTokensInSession($accessToken, $client->getRefreshToken(), $accessToken['expires_in']);
 
             // Get user info
             $oauthService = new Oauth2($client);
             $googleUser = $oauthService->userinfo->get();
+
+            Log::info('Google user info fetched', ['email' => $googleUser->email]);
 
             // Find or create user
             $user = User::updateOrCreate(
@@ -61,19 +60,19 @@ class GoogleAuthController extends Controller
             // Log in user
             Auth::login($user);
 
+            Log::info('User logged in successfully', ['user_id' => $user->id]);
+
             // Redirect after successful login
             return redirect('/')->with('status', 'Logged in with Google successfully.');
         } catch (\Exception $e) {
+            Log::error('Exception during Google login: ' . $e->getMessage());
             return redirect('/error')->with('error', 'Failed to log in with Google: ' . $e->getMessage());
         }
     }
 
     public function logout(Request $request)
     {
-        $client = new Google_Client();
-        $client->setClientId(env('GMB_CLIENT_ID'));
-        $client->setClientSecret(env('GMB_CLIENT_SECRET'));
-        $client->setHttpClient(new \GuzzleHttp\Client(['verify' => base_path('cacert.pem')]));
+        $client = $this->getGoogleClient();
 
         $accessToken = Session::get('google_access_token');
 
@@ -98,5 +97,22 @@ class GoogleAuthController extends Controller
         Cookie::queue(Cookie::forget('google_refresh_token'));
 
         return redirect('/auth/google');
+    }
+
+    private function getGoogleClient()
+    {
+        $client = new Google_Client();
+        $client->setClientId(env('GMB_CLIENT_ID'));
+        $client->setClientSecret(env('GMB_CLIENT_SECRET'));
+        $client->setRedirectUri(env('GMB_REDIRECT_URI'));
+        $client->setHttpClient(new \GuzzleHttp\Client(['verify' => base_path('cacert.pem')]));
+        return $client;
+    }
+
+    private function storeTokensInSession($accessToken, $refreshToken, $expiresIn)
+    {
+        Session::put('google_access_token', $accessToken['access_token']);
+        Session::put('google_refresh_token', $refreshToken);
+        Session::put('google_expires_at', time() + $expiresIn);
     }
 }

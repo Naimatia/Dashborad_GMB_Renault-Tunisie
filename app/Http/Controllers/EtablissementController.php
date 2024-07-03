@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\Session;
 
 class etablissementController extends Controller
 {
-
-
-
     public function PerfermanceAPI(Request $request, $id)
     {
         // Retrieve query parameters

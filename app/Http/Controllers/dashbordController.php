@@ -14,6 +14,8 @@ class DashbordController extends Controller
 
     public function PerfermanceAPI(Request $request, $id)
     {
+        Log::info('PerfermanceAPI method called', ['location_id' => $id]);
+
 
         // Retrieve query parameters
         $startYear = $request->query('startYear');
@@ -34,6 +36,9 @@ class DashbordController extends Controller
         if (!$token) {
             return redirect('/')->with('error', 'Access token is not set. Please login again.');
         }
+
+        Log::info('Access token is set', ['token' => $token]);
+
 
         // Check if the start year is a leap year and if the start month is February
         if (($startLastYear % 4 == 0 && $startLastYear % 100 != 0) || $startLastYear % 400 == 0) {
@@ -95,12 +100,15 @@ class DashbordController extends Controller
 
     public function ListeLocalisation(Request $request)
     {
+        Log::info('ListeLocalisation method called');
 
         $token = session('google_access_token');
 
         if (!$token) {
+            Log::error('Access token is not set.');
             return redirect('/')->with('error', 'Access token is not set. Please login again.');
         }
+        Log::info('Access token is set', ['token' => $token]);
 
         // Retrieve date range from request query parameters
         $startYear = $request->query('startYear');
@@ -117,6 +125,7 @@ class DashbordController extends Controller
         $cachedData = Redis::get($locationsCacheKey);
 
         if ($cachedData) {
+            Log::info('Cached data found for locations.');
             // Decode cached data from Redis
             $cachedData = json_decode($cachedData, true);
             $coordinates = $cachedData['coordinates'];
@@ -126,7 +135,7 @@ class DashbordController extends Controller
             $accountId = env('GOOGLE_ACCOUNT_ID');
 
             // Base URL for Google My Business API
-            $baseUrl = 'https://mybusinessbusinessinformation.googleapis.com/v1/accounts/{$accountId}/locations';
+            $baseUrl = "https://mybusinessbusinessinformation.googleapis.com/v1/accounts/{$accountId}/locations";
             $readMask = 'latlng,title,name';
 
             // Array to store locations' data
@@ -147,6 +156,8 @@ class DashbordController extends Controller
                     $url .= '&pageToken=' . $nextPageToken;
                 }
 
+                Log::info('Fetching data from API', ['url' => $url]);
+
                 $response = Http::withOptions([
                     'verify' => 'E:\\PFE package\\Dashborad_GMB\\cacert.pem',
                 ])->withHeaders([
@@ -154,8 +165,11 @@ class DashbordController extends Controller
                 ])->get($url);
 
                 if ($response->failed()) {
-                    return redirect('/')->with('error', 'Failed to fetch data from Google My Business.');
+                    Log::error('Failed to fetch data from API', ['url' => $url, 'response' => $response->body()]);
+                    return response()->json(['error' => 'Failed to fetch data from API'], 500);
                 }
+
+                Log::info('Data fetched successfully from API', ['url' => $url]);
 
                 // Get the JSON data from the response
                 $data = $response->json();
@@ -223,4 +237,5 @@ class DashbordController extends Controller
             return view('dashbord', compact('coordinates', 'verifiedCount', 'performanceData'));
         }
     }
+
 }

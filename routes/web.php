@@ -27,6 +27,9 @@ Route::middleware(['auth' ])->group(function () {
     });
 });
 
+Route::get('/Établissements', [GoogleLocationController::class, 'ListeEtablissement'])->name('Établissements');
+
+
 // Google authentication routes without auth middleware
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);

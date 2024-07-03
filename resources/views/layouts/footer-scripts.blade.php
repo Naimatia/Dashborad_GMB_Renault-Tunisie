@@ -121,7 +121,7 @@
                     _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
-                    console.log('Performance data:', response);
+                  //  console.log('Performance data:', response);
 
                     // Update charts and view elements
                     updateCharts(response);
@@ -148,7 +148,7 @@
                     endDay: endDate.format('D')
                 },
                 success: function(response) {
-                    console.log('Data received:', response);
+                  //  console.log('Data received:', response);
 
                     // Calculate totals and graph data
                     const { totalSum, graphInteractionData } = calculateSumOfValues(response);
