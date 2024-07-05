@@ -23,7 +23,6 @@
 @endsection
 
 
-
 @section('title_page1')
     Accueil
 @endsection

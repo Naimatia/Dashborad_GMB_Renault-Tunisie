@@ -7,7 +7,6 @@
 
 @section('css')
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
 @endsection
 
 @section('title_head')
