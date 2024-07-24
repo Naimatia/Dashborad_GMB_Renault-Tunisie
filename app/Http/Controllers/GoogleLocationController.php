@@ -67,11 +67,18 @@ class GoogleLocationController extends Controller
                     $location['verified'] = false;
                     if ($verificationResponse->successful()) {
                         $verificationData = $verificationResponse->json();
-                        foreach ($verificationData['verifications'] as $verification) {
-                            if ($verification['state'] === 'COMPLETED') {
-                                $location['verified'] = true;
-                                break;
+                        if (isset($verificationData['verifications'])) {
+                            foreach ($verificationData['verifications'] as $verification) {
+                                if ($verification['state'] === 'COMPLETED') {
+                                    $location['verified'] = true;
+                                    break;
+                                }
                             }
+                        } else {
+                            Log::warning('Verification data does not contain verifications key', [
+                                'verificationUrl' => $verificationUrl,
+                                'data' => $verificationData
+                            ]);
                         }
                     } else {
                         Log::error('Failed to fetch verification data', [
